@@ -89,12 +89,16 @@ function OnboardingCarousel({ onDone, onSkip }) {
 
   return (
     <div className="onboarding" role="dialog" aria-label="Feature onboarding" aria-modal="true">
-      <div className="onboarding-inner">
-        {/* Skip */}
+      {/* Top bar: Skip (left) ── spacer for X close button (right) */}
+      <div className="onboarding-topbar">
         <button className="onboarding-skip" onClick={onSkip} id="onboarding-skip-btn">
           Skip
         </button>
+        {/* Spacer reserves the 36px where the panel's X close button sits */}
+        <div className="onboarding-topbar-spacer" aria-hidden="true" />
+      </div>
 
+      <div className="onboarding-inner">
         {/* Slide */}
         <div className={`onboarding-slide slide-${direction}`} key={current}>
           <div className="onboarding-icon" style={{ '--slide-color': slide.color }}>

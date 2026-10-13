@@ -131,7 +131,11 @@ export default function LandingPage({ onLogin, onSignup, onGuest }) {
           {/* Social proof */}
           <p className="hero-social-proof animate-fadeInUp delay-400">
             <Shield size={14} className="hero-shield" />
-            No credit card required &nbsp;·&nbsp; Free forever plan &nbsp;·&nbsp; 10,000+ learners
+            <span className="proof-item">No credit card required</span>
+            <span className="proof-dot">·</span>
+            <span className="proof-item">Free forever plan</span>
+            <span className="proof-dot">·</span>
+            <span className="proof-item">10,000+ learners</span>
           </p>
 
           {/* Hero visual card */}

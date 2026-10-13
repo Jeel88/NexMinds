@@ -1,0 +1,113 @@
+/* Navbar Styles */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 20px 0;
+  transition: all 0.3s ease;
+}
+
+.navbar-scrolled {
+  background: rgba(16, 16, 16, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(45, 39, 56, 0.6);
+  padding: 14px 0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Logo */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #C6FF45, #8BE200);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0A0A0A;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 16px rgba(198, 255, 69, 0.25);
+}
+
+.navbar-logo:hover .logo-icon {
+  transform: rotate(-8deg) scale(1.1);
+}
+
+.logo-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1875rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.logo-accent {
+  color: #C6FF45;
+}
+
+/* Stat badges */
+.navbar-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(30, 26, 38, 0.8);
+  border: 1px solid #2D2738;
+  border-radius: 9999px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #A8A5AF;
+  transition: all 0.2s ease;
+}
+
+.stat-badge:hover {
+  border-color: #3D3648;
+  color: #ffffff;
+}
+
+.stat-icon--xp    { color: #C6FF45; }
+.stat-icon--streak { color: #F59E0B; }
+
+.stat-label { 
+  font-variant-numeric: tabular-nums;
+}
+
+/* Actions */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .navbar-stats {
+    display: none;
+  }
+}

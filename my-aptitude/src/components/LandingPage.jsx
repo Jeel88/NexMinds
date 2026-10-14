@@ -54,7 +54,7 @@ const STATS = [
   { value: '5min', label: 'Avg. Session', icon: <Clock size={20} /> },
 ];
 
-export default function LandingPage({ onLogin, onSignup, onGuest }) {
+export default function LandingPage({ onLogin, onSignup }) {
   const heroRef = useRef(null);
 
   // Parallax-lite: move glow orb on mousemove
@@ -115,15 +115,15 @@ export default function LandingPage({ onLogin, onSignup, onGuest }) {
               aria-label="Create a free account"
             >
               <Zap size={20} />
-              Start Training Free
+              Start Fast Login
             </button>
             <button
-              id="hero-guest-btn"
+              id="hero-fast-login-btn"
               className="btn btn-secondary btn-lg"
-              onClick={onGuest}
-              aria-label="Try as guest"
+              onClick={onLogin}
+              aria-label="Fast Login with Google"
             >
-              Try as Guest
+              1-Tap Google Login
               <ArrowRight size={18} />
             </button>
           </div>

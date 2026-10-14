@@ -1,0 +1,348 @@
+/* ── Rank Info Modal Styles ───────────────────────────────── */
+.rank-info-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 3, 8, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.rank-info-modal {
+  width: 100%;
+  max-width: 620px;
+  max-height: 85vh;
+  background: linear-gradient(165deg, #140E24 0%, #0C0816 100%);
+  border: 1px solid #2B2144;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.8),
+              0 0 30px -5px rgba(198, 255, 69, 0.12);
+  overflow: hidden;
+  animation: scaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rank-info-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #221A36;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(19, 14, 34, 0.7);
+}
+
+.rank-info-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.rank-info-icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(198, 255, 69, 0.12);
+  border: 1px solid rgba(198, 255, 69, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rank-info-title {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 0 0 2px;
+}
+
+.rank-info-sub {
+  font-size: 0.78125rem;
+  color: #8C849B;
+  margin: 0;
+}
+
+.rank-info-close {
+  background: #1C152E;
+  border: 1px solid #2B2144;
+  color: #9E96AF;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rank-info-close:hover {
+  background: #281F40;
+  color: #FFFFFF;
+}
+
+/* Tabs */
+.rank-info-tabs {
+  display: flex;
+  background: #0E0A1A;
+  border-bottom: 1px solid #1E1630;
+  padding: 6px 16px;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.rank-info-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #8C849B;
+  font-size: 0.78125rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.rank-info-tab:hover {
+  color: #FFFFFF;
+  background: #181229;
+}
+
+.rank-info-tab--active {
+  background: #211936 !important;
+  color: #C6FF45 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Body */
+.rank-info-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.rank-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rank-formula-card {
+  background: #100C1C;
+  border: 1px solid #281F3E;
+  border-left: 4px solid #C6FF45;
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.formula-eyebrow {
+  display: block;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #787085;
+  margin-bottom: 4px;
+}
+
+.formula-equation {
+  font-family: monospace;
+  font-size: 0.8125rem;
+  color: #C6FF45;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.rank-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.rank-detail-card {
+  background: #130E22;
+  border: 1px solid #261D39;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-num {
+  font-size: 0.6875rem;
+  font-weight: 900;
+  color: #C6FF45;
+  background: rgba(198, 255, 69, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.card-title {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.card-desc {
+  font-size: 0.75rem;
+  color: #A8A3B5;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Tiers Table */
+.section-lead-text {
+  font-size: 0.8125rem;
+  color: #9E9AA8;
+  margin: 0;
+}
+
+.tiers-table-wrap {
+  border: 1px solid #261D3A;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tiers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78125rem;
+}
+
+.tiers-table th {
+  background: #0F0B1A;
+  color: #787085;
+  font-weight: 800;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #231A36;
+}
+
+.tiers-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #1C152E;
+  color: #C3BED0;
+}
+
+.tier-row--highlight {
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.tier-name {
+  font-weight: 700;
+}
+
+.tier-pill {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  background: #1A132B;
+  border: 1px solid #332752;
+  color: #A8A5AF;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.tier-pill--active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38BDF8;
+  color: #38BDF8;
+}
+
+/* Multipliers */
+.multipliers-list, .rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mult-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #130E22;
+  border: 1px solid #261D3A;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.mult-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mult-left strong {
+  display: block;
+  font-size: 0.84rem;
+  color: #FFFFFF;
+}
+
+.mult-left p {
+  font-size: 0.75rem;
+  color: #8C849B;
+  margin: 2px 0 0;
+}
+
+.mult-val {
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #130E22;
+  border: 1px solid #261D3A;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.rule-item strong {
+  display: block;
+  font-size: 0.84rem;
+  color: #FFFFFF;
+}
+
+.rule-item p {
+  font-size: 0.75rem;
+  color: #8C849B;
+  margin: 3px 0 0;
+  line-height: 1.45;
+}
+
+/* Footer */
+.rank-info-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #221A36;
+  background: #0E0A1A;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.rank-footer-note {
+  font-size: 0.75rem;
+  color: #787085;
+  margin: 0;
+}

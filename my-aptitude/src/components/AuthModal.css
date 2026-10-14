@@ -449,3 +449,129 @@
   .onboarding-nav { gap: 8px; }
   .onboarding-nav .btn { font-size: 0.875rem; padding: 10px 18px; }
 }
+
+/* ── Fast Google Login Button ──────────────────────────── */
+.btn-google-fast {
+  background: #FFFFFF;
+  color: #1F1F1F;
+  border: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  height: 48px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.btn-google-fast:hover:not(:disabled) {
+  background: #F8FAFC;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15), 0 0 12px rgba(66, 133, 244, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-google-fast:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-google-fast:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.google-icon {
+  flex-shrink: 0;
+}
+
+.fast-tag {
+  font-size: 0.625rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: #EBF5FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+/* ── Fast Login Modal View ─────────────────────────────── */
+.fast-auth-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fast-logo-glow {
+  background: rgba(198, 255, 69, 0.12) !important;
+  border-color: rgba(198, 255, 69, 0.35) !important;
+  color: #C6FF45 !important;
+  box-shadow: 0 0 24px rgba(198, 255, 69, 0.2);
+}
+
+.fast-perks-box {
+  background: #110D1E;
+  border: 1px solid #281F3E;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fast-perk-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fast-perk-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #19132B;
+  border: 1px solid #2F244A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fast-perk-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.fast-perk-text strong {
+  font-size: 0.84rem;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.fast-perk-text span {
+  font-size: 0.73rem;
+  color: #8C849B;
+}
+
+.fast-auth-error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #F87171;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.fast-auth-footnote {
+  font-size: 0.72rem;
+  color: #6A627B;
+  text-align: center;
+  margin: 0;
+}

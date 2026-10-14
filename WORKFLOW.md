@@ -67,7 +67,7 @@ This document outlines the phased development plan for **MyAptitude**, a premium
 
 ---
 
-### [ ] Phase 3: Home Dashboard
+### [x] Phase 3: Home Dashboard
 - **Goal**: Build a personalized, high-engagement student hub.
 - **Deliverables**:
   - User greeting with level & XP progress bar.

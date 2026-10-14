@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  X, Eye, EyeOff, Zap, Brain, Mail, Lock,
-  User, ChevronRight, ChevronLeft, Check,
-  Target, TrendingUp, Flame, ArrowRight
+  X, Zap, Brain, ChevronRight, ChevronLeft,
+  Target, TrendingUp, Flame, ArrowRight, ShieldCheck, Sparkles
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './AuthModal.css';
 
 /* ── Onboarding Slides ─────────────────────────────── */
@@ -40,32 +40,6 @@ const SLIDES = [
   },
 ];
 
-/* ── Form validation helpers ───────────────────────── */
-const validateEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-const validatePassword = (v) => v.length >= 8;
-const validateName = (v) => v.trim().length >= 2;
-
-/* ── Password strength indicator ──────────────────── */
-function getPasswordStrength(password) {
-  if (!password) return { score: 0, label: '', color: '' };
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-
-  const levels = [
-    { label: '', color: '' },
-    { label: 'Weak', color: '#EF4444' },
-    { label: 'Fair', color: '#F59E0B' },
-    { label: 'Good', color: '#60A5FA' },
-    { label: 'Strong', color: '#22C55E' },
-    { label: 'Very Strong', color: '#C6FF45' },
-  ];
-  return { score, ...levels[Math.min(score, 5)] };
-}
-
 /* ── Onboarding Carousel ───────────────────────────── */
 function OnboardingCarousel({ onDone, onSkip }) {
   const [current, setCurrent] = useState(0);
@@ -89,18 +63,15 @@ function OnboardingCarousel({ onDone, onSkip }) {
 
   return (
     <div className="onboarding" role="dialog" aria-label="Feature onboarding" aria-modal="true">
-      {/* Top bar: Skip (left) ── spacer for X close button (right) */}
       <div className="onboarding-topbar">
         <button className="onboarding-skip" onClick={onSkip} id="onboarding-skip-btn">
           Skip
         </button>
-        {/* Spacer reserves the 36px where the panel's X close button sits */}
         <div className="onboarding-topbar-spacer" aria-hidden="true" />
       </div>
 
       <div className="onboarding-inner">
-        {/* Slide */}
-        <div className={`onboarding-slide slide-${direction}`} key={current}>
+        <div className="onboarding-slide slide-${direction}" key={current}>
           <div className="onboarding-icon" style={{ '--slide-color': slide.color }}>
             {slide.icon}
           </div>
@@ -108,7 +79,6 @@ function OnboardingCarousel({ onDone, onSkip }) {
           <p className="onboarding-desc">{slide.desc}</p>
         </div>
 
-        {/* Dots */}
         <div className="onboarding-dots" role="tablist" aria-label="Slide indicator">
           {SLIDES.map((_, i) => (
             <button
@@ -123,7 +93,6 @@ function OnboardingCarousel({ onDone, onSkip }) {
           ))}
         </div>
 
-        {/* Navigation */}
         <div className="onboarding-nav">
           {current > 0 && (
             <button
@@ -141,7 +110,7 @@ function OnboardingCarousel({ onDone, onSkip }) {
             id="onboarding-next-btn"
           >
             {current === SLIDES.length - 1 ? (
-              <>Let&apos;s Go! <Zap size={18} /></>
+              <>Start Fast Login <Zap size={18} /></>
             ) : (
               <>Next <ChevronRight size={18} /></>
             )}
@@ -152,333 +121,99 @@ function OnboardingCarousel({ onDone, onSkip }) {
   );
 }
 
-/* ── Login Form ────────────────────────────────────── */
-function LoginForm({ onSwitchToSignup, onSuccess, onGuest }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPw, setShowPw] = useState(false);
-  const [errors, setErrors] = useState({});
+/* ── 100% Fast Login Component (No Email / No Password) ── */
+function FastLoginForm({ onSuccess, onGuest }) {
+  const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const validate = () => {
-    const errs = {};
-    if (!validateEmail(email)) errs.email = 'Please enter a valid email address.';
-    if (!password) errs.password = 'Password is required.';
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
-    // Simulate async — mock demo mode
-    await new Promise(r => setTimeout(r, 900));
-    setLoading(false);
-    onSuccess({ email, name: email.split('@')[0] });
+  const handleGoogleFastLogin = async () => {
+    try {
+      setLoading(true);
+      setErrorMsg('');
+      const res = await loginWithGoogle();
+      if (res && res.user) {
+        onSuccess(res.user);
+      }
+    } catch (err) {
+      console.error('Google login error:', err);
+      setErrorMsg(err.message || 'Unable to connect with Google. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit} noValidate aria-label="Login form">
+    <div className="fast-auth-container" aria-label="Fast Login">
       <div className="auth-form-header">
-        <div className="auth-form-logo">
-          <Brain size={22} strokeWidth={2.5} />
+        <div className="auth-form-logo fast-logo-glow">
+          <Brain size={26} strokeWidth={2.5} />
         </div>
-        <h2 className="auth-form-title">Welcome back</h2>
-        <p className="auth-form-subtitle">Log in to continue your training</p>
+        <h2 className="auth-form-title">Fast Login</h2>
+        <p className="auth-form-subtitle">One-tap instant access to your aptitude training</p>
       </div>
 
-      {/* Email */}
-      <div className="form-group">
-        <label htmlFor="login-email" className="form-label">Email</label>
-        <div className="input-wrapper">
-          <span className="input-icon-left"><Mail size={16} /></span>
-          <input
-            id="login-email"
-            type="email"
-            className={`input-field input-with-left-icon ${errors.email ? 'error' : ''}`}
-            placeholder="you@example.com"
-            value={email}
-            onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: '' })); }}
-            autoComplete="email"
-            aria-describedby={errors.email ? 'login-email-error' : undefined}
-          />
-        </div>
-        {errors.email && (
-          <span id="login-email-error" className="form-error" role="alert">{errors.email}</span>
-        )}
-      </div>
-
-      {/* Password */}
-      <div className="form-group">
-        <div className="form-label-row">
-          <label htmlFor="login-password" className="form-label">Password</label>
-          <button type="button" className="form-link" id="forgot-password-btn">Forgot password?</button>
-        </div>
-        <div className="input-wrapper">
-          <span className="input-icon-left"><Lock size={16} /></span>
-          <input
-            id="login-password"
-            type={showPw ? 'text' : 'password'}
-            className={`input-field input-with-left-icon ${errors.password ? 'error' : ''}`}
-            placeholder="Your password"
-            value={password}
-            onChange={e => { setPassword(e.target.value); setErrors(p => ({ ...p, password: '' })); }}
-            autoComplete="current-password"
-            aria-describedby={errors.password ? 'login-pw-error' : undefined}
-          />
-          <button
-            type="button"
-            className="input-icon-right"
-            onClick={() => setShowPw(v => !v)}
-            aria-label={showPw ? 'Hide password' : 'Show password'}
-            id="login-toggle-pw"
-          >
-            {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-        </div>
-        {errors.password && (
-          <span id="login-pw-error" className="form-error" role="alert">{errors.password}</span>
-        )}
-      </div>
-
-      {/* Submit */}
-      <button
-        type="submit"
-        id="login-submit-btn"
-        className="btn btn-primary btn-lg w-full"
-        disabled={loading}
-        aria-live="polite"
-      >
-        {loading ? <span className="spinner" aria-label="Logging in…" /> : <><Zap size={18} /> Log In</>}
-      </button>
-
-      {/* Divider */}
-      <div className="divider-text">or continue with</div>
-
-      {/* Guest */}
-      <button
-        type="button"
-        id="login-guest-btn"
-        className="btn btn-secondary btn-lg w-full"
-        onClick={onGuest}
-      >
-        Continue as Guest
-        <ArrowRight size={18} />
-      </button>
-
-      {/* Switch */}
-      <p className="auth-switch">
-        Don&apos;t have an account?{' '}
-        <button
-          type="button"
-          className="form-link"
-          id="switch-to-signup-btn"
-          onClick={onSwitchToSignup}
-        >
-          Sign up free
-        </button>
-      </p>
-    </form>
-  );
-}
-
-/* ── Signup Form ───────────────────────────────────── */
-function SignupForm({ onSwitchToLogin, onSuccess, onGuest }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPw, setShowPw] = useState(false);
-  const [agreed, setAgreed] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  const strength = getPasswordStrength(password);
-
-  const validate = () => {
-    const errs = {};
-    if (!validateName(name)) errs.name = 'Name must be at least 2 characters.';
-    if (!validateEmail(email)) errs.email = 'Please enter a valid email address.';
-    if (!validatePassword(password)) errs.password = 'Password must be at least 8 characters.';
-    if (!agreed) errs.agreed = 'You must agree to continue.';
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setLoading(false);
-    onSuccess({ email, name: name.trim() });
-  };
-
-  return (
-    <form className="auth-form" onSubmit={handleSubmit} noValidate aria-label="Sign up form">
-      <div className="auth-form-header">
-        <div className="auth-form-logo">
-          <Brain size={22} strokeWidth={2.5} />
-        </div>
-        <h2 className="auth-form-title">Create your account</h2>
-        <p className="auth-form-subtitle">Start training free — no credit card required</p>
-      </div>
-
-      {/* Name */}
-      <div className="form-group">
-        <label htmlFor="signup-name" className="form-label">Full Name</label>
-        <div className="input-wrapper">
-          <span className="input-icon-left"><User size={16} /></span>
-          <input
-            id="signup-name"
-            type="text"
-            className={`input-field input-with-left-icon ${errors.name ? 'error' : ''}`}
-            placeholder="Your name"
-            value={name}
-            onChange={e => { setName(e.target.value); setErrors(p => ({ ...p, name: '' })); }}
-            autoComplete="name"
-            aria-describedby={errors.name ? 'signup-name-error' : undefined}
-          />
-        </div>
-        {errors.name && (
-          <span id="signup-name-error" className="form-error" role="alert">{errors.name}</span>
-        )}
-      </div>
-
-      {/* Email */}
-      <div className="form-group">
-        <label htmlFor="signup-email" className="form-label">Email</label>
-        <div className="input-wrapper">
-          <span className="input-icon-left"><Mail size={16} /></span>
-          <input
-            id="signup-email"
-            type="email"
-            className={`input-field input-with-left-icon ${errors.email ? 'error' : ''}`}
-            placeholder="you@example.com"
-            value={email}
-            onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: '' })); }}
-            autoComplete="email"
-            aria-describedby={errors.email ? 'signup-email-error' : undefined}
-          />
-        </div>
-        {errors.email && (
-          <span id="signup-email-error" className="form-error" role="alert">{errors.email}</span>
-        )}
-      </div>
-
-      {/* Password + strength */}
-      <div className="form-group">
-        <label htmlFor="signup-password" className="form-label">Password</label>
-        <div className="input-wrapper">
-          <span className="input-icon-left"><Lock size={16} /></span>
-          <input
-            id="signup-password"
-            type={showPw ? 'text' : 'password'}
-            className={`input-field input-with-left-icon ${errors.password ? 'error' : ''}`}
-            placeholder="At least 8 characters"
-            value={password}
-            onChange={e => { setPassword(e.target.value); setErrors(p => ({ ...p, password: '' })); }}
-            autoComplete="new-password"
-            aria-describedby="password-strength"
-          />
-          <button
-            type="button"
-            className="input-icon-right"
-            onClick={() => setShowPw(v => !v)}
-            aria-label={showPw ? 'Hide password' : 'Show password'}
-            id="signup-toggle-pw"
-          >
-            {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-        </div>
-        {errors.password && (
-          <span className="form-error" role="alert">{errors.password}</span>
-        )}
-        {/* Strength meter */}
-        {password && (
-          <div className="strength-meter" id="password-strength" aria-live="polite">
-            <div className="strength-bars">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div
-                  key={i}
-                  className="strength-bar"
-                  style={{
-                    background: i <= strength.score ? strength.color : '#2D2738',
-                    transition: `background 0.2s ease ${i * 0.05}s`
-                  }}
-                />
-              ))}
-            </div>
-            <span className="strength-label" style={{ color: strength.color }}>
-              {strength.label}
-            </span>
+      {/* Benefits checklist */}
+      <div className="fast-perks-box">
+        <div className="fast-perk-item">
+          <div className="fast-perk-icon-wrap text-lime">
+            <Zap size={16} />
           </div>
-        )}
+          <div className="fast-perk-text">
+            <strong>1-Tap Instant Access</strong>
+            <span>No passwords to remember or type</span>
+          </div>
+        </div>
+
+        <div className="fast-perk-item">
+          <div className="fast-perk-icon-wrap text-orange">
+            <Flame size={16} />
+          </div>
+          <div className="fast-perk-text">
+            <strong>Sync Streaks & XP</strong>
+            <span>Securely saved in Supabase database</span>
+          </div>
+        </div>
+
+        <div className="fast-perk-item">
+          <div className="fast-perk-icon-wrap text-cyan">
+            <ShieldCheck size={16} />
+          </div>
+          <div className="fast-perk-text">
+            <strong>Official Google OAuth</strong>
+            <span>Enterprise-grade authentication & privacy</span>
+          </div>
+        </div>
       </div>
 
-      {/* Terms */}
-      <div className="form-group">
-        <label className={`checkbox-label ${errors.agreed ? 'checkbox-error' : ''}`} htmlFor="signup-terms">
-          <input
-            type="checkbox"
-            id="signup-terms"
-            checked={agreed}
-            onChange={e => { setAgreed(e.target.checked); setErrors(p => ({ ...p, agreed: '' })); }}
-            className="checkbox-input"
-          />
-          <span className="checkbox-custom">
-            {agreed && <Check size={12} strokeWidth={3} />}
-          </span>
-          <span className="checkbox-text">
-            I agree to the{' '}
-            <a href="#" className="form-link" onClick={e => e.stopPropagation()}>Terms of Service</a>
-            {' '}and{' '}
-            <a href="#" className="form-link" onClick={e => e.stopPropagation()}>Privacy Policy</a>
-          </span>
-        </label>
-        {errors.agreed && (
-          <span className="form-error" role="alert">{errors.agreed}</span>
-        )}
-      </div>
+      {errorMsg && (
+        <div className="fast-auth-error" role="alert">
+          {errorMsg}
+        </div>
+      )}
 
-      {/* Submit */}
-      <button
-        type="submit"
-        id="signup-submit-btn"
-        className="btn btn-primary btn-lg w-full"
-        disabled={loading}
-        aria-live="polite"
-      >
-        {loading ? <span className="spinner" aria-label="Creating account…" /> : <><Zap size={18} /> Create Account</>}
-      </button>
-
-      {/* Divider */}
-      <div className="divider-text">or</div>
-
-      {/* Guest */}
+      {/* The Sole Primary Action: Fast Login with Google */}
       <button
         type="button"
-        id="signup-guest-btn"
-        className="btn btn-secondary btn-lg w-full"
-        onClick={onGuest}
+        id="google-fast-login-btn"
+        className="btn btn-google-fast w-full"
+        onClick={handleGoogleFastLogin}
+        disabled={loading}
       >
-        Continue as Guest
-        <ArrowRight size={18} />
+        <svg className="google-icon" width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+        </svg>
+        <span>{loading ? 'Connecting Google...' : 'Fast Login with Google'}</span>
+        <span className="fast-tag">1-TAP</span>
       </button>
 
-      {/* Switch */}
-      <p className="auth-switch">
-        Already have an account?{' '}
-        <button
-          type="button"
-          className="form-link"
-          id="switch-to-login-btn"
-          onClick={onSwitchToLogin}
-        >
-          Log in
-        </button>
+      <p className="fast-auth-footnote">
+        Protected by Supabase & Google Cloud. Zero passwords required.
       </p>
-    </form>
+    </div>
   );
 }
 
@@ -487,7 +222,6 @@ export default function AuthModal({
   mode,           // 'login' | 'signup' | 'onboarding'
   onClose,
   onAuthSuccess,
-  onGuest,
   onSwitchMode,
 }) {
   // Close on Escape
@@ -518,11 +252,7 @@ export default function AuthModal({
         className={`modal-panel animate-scaleIn ${mode === 'onboarding' ? 'modal-panel--onboarding' : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label={
-          mode === 'login' ? 'Login dialog' :
-          mode === 'signup' ? 'Sign up dialog' :
-          'Feature overview'
-        }
+        aria-label="Fast Login Dialog"
       >
         {/* Close button */}
         <button
@@ -535,24 +265,14 @@ export default function AuthModal({
         </button>
 
         {/* Content */}
-        {mode === 'onboarding' && (
+        {mode === 'onboarding' ? (
           <OnboardingCarousel
-            onDone={() => onSwitchMode('signup')}
-            onSkip={() => onSwitchMode('signup')}
+            onDone={() => onSwitchMode('login')}
+            onSkip={() => onSwitchMode('login')}
           />
-        )}
-        {mode === 'login' && (
-          <LoginForm
-            onSwitchToSignup={() => onSwitchMode('signup')}
+        ) : (
+          <FastLoginForm
             onSuccess={onAuthSuccess}
-            onGuest={onGuest}
-          />
-        )}
-        {mode === 'signup' && (
-          <SignupForm
-            onSwitchToLogin={() => onSwitchMode('login')}
-            onSuccess={onAuthSuccess}
-            onGuest={onGuest}
           />
         )}
       </div>

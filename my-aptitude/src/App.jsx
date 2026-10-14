@@ -3,13 +3,13 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
-import DashboardPlaceholder from './components/DashboardPlaceholder';
+import Dashboard from './components/Dashboard';
 
 /**
  * Inner app — has access to auth context.
  */
 function AppInner() {
-  const { user, login, continueAsGuest } = useAuth();
+  const { user, login } = useAuth();
 
   // Modal state: null | 'onboarding' | 'login' | 'signup'
   const [modalMode, setModalMode] = useState(null);
@@ -22,14 +22,9 @@ function AppInner() {
     closeModal();
   };
 
-  const handleGuest = () => {
-    continueAsGuest();
-    closeModal();
-  };
-
-  // If user is logged in (or guest), show dashboard
+  // If user is logged in, show dashboard
   if (user) {
-    return <DashboardPlaceholder />;
+    return <Dashboard />;
   }
 
   return (
@@ -37,14 +32,13 @@ function AppInner() {
       {/* Navigation */}
       <Navbar
         onLogin={() => openModal('login')}
-        onSignup={() => openModal('onboarding')}
+        onSignup={() => openModal('login')}
       />
 
       {/* Landing / Home page */}
       <LandingPage
         onLogin={() => openModal('login')}
-        onSignup={() => openModal('onboarding')}
-        onGuest={handleGuest}
+        onSignup={() => openModal('login')}
       />
 
       {/* Auth Modal (conditionally rendered) */}
@@ -53,7 +47,6 @@ function AppInner() {
           mode={modalMode}
           onClose={closeModal}
           onAuthSuccess={handleAuthSuccess}
-          onGuest={handleGuest}
           onSwitchMode={setModalMode}
         />
       )}

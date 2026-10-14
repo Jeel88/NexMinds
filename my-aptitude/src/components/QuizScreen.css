@@ -5,7 +5,9 @@
 .quiz-screen {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
   background: #0C0A12;
   background-image:
     radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--cat) 6%, transparent) 0%, transparent 55%);

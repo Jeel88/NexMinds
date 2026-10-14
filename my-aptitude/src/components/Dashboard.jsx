@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
-import { 
-  Zap, 
-  Flame, 
-  Shield, 
-  Crown, 
-  Puzzle, 
-  FastForward, 
-  Hash, 
-  ChevronRight, 
-  Gamepad2, 
-  User, 
-  Sparkles, 
+import {
+  Zap,
+  Flame,
+  Shield,
+  Crown,
+  Puzzle,
+  FastForward,
+  Hash,
+  ChevronRight,
+  Gamepad2,
+  User,
+  Sparkles,
   BarChart3,
   ArrowUpRight,
   Play,
@@ -38,7 +38,7 @@ import './Dashboard.css';
 
 // Default baseline contenders for arena podium
 const BASE_CONTENDERS = [
-  { id: 'c1', name: 'Aarav S.', xp: 2840, level: 12, streak: 14, avatar: 'AS' },
+  { id: 'c1', name: 'Aarav S.', xp: 100, level: 12, streak: 14, avatar: 'AS' },
   { id: 'c2', name: 'Sophia K.', xp: 2610, level: 11, streak: 9, avatar: 'SK' },
   { id: 'c3', name: 'Rohan M.', xp: 2450, level: 10, streak: 7, avatar: 'RM' },
 ];
@@ -165,67 +165,7 @@ export default function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  const openPractice = (catId = 'math', isDaily = false) => {
-    setSelectedCatId(catId);
-    setIsDailyChallengeMode(isDaily);
-    setPracticeModalOpen(true);
-  };
-
-  // Launch the actual quiz session
-  const handleLaunchPractice = (config) => {
-    setPracticeModalOpen(false);
-    setQuizConfig(config);
-  };
-
-  // If quiz is active, render full-screen quiz
-  if (quizConfig) {
-    return <QuizScreen config={quizConfig} onComplete={() => setQuizConfig(null)} />;
-  }
-
-  // If viewing the Rewards Vault, render the dedicated store page
-  if (activeView === 'redeem') {
-    return (
-      <RedeemStore 
-        onBack={() => setActiveView('dashboard')} 
-        onStartDrill={() => {
-          setActiveView('dashboard');
-          openPractice('math', false);
-        }} 
-      />
-    );
-  }
-
-  // If viewing the Study Handbook (No XP, step-by-step derivations)
-  if (activeView === 'study') {
-    return (
-      <StudyBook 
-        onBack={() => setActiveView('dashboard')} 
-      />
-    );
-  }
-
-  const selectedCategory = CATEGORIES.find((c) => c.id === selectedCatId) || CATEGORIES[0];
-  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
-  const userName = user?.name || 'Explorer';
-  const xp = user?.xp ?? 0;
-  const streak = user?.streak ?? 0;
-  const level = user?.level ?? 1;
-  const nextLevelXP = level * 250;
-  const currentLevelBaseXP = (level - 1) * 250;
-  const levelProgress = Math.min(
-    100,
-    Math.max(0, Math.round(((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100))
-  );
-
-  // Helper to ensure colors are readable in Light Mode
-  const getCatColor = (cat) => {
-    if (theme === 'light' && (cat?.color === '#C6FF45' || cat?.id === 'logic')) {
-      return '#15803D';
-    }
-    return cat?.color || '#FF9500';
-  };
-
-  // Dynamic Leaderboard from Supabase DB
+  // Dynamic Leaderboard from Supabase DB (Hook called unconditionally)
   const [dbProfiles, setDbProfiles] = useState([]);
 
   useEffect(() => {
@@ -254,6 +194,66 @@ export default function Dashboard() {
       clearInterval(interval);
     };
   }, [user?.id, user?.xp]);
+
+  const openPractice = (catId = 'math', isDaily = false) => {
+    setSelectedCatId(catId);
+    setIsDailyChallengeMode(isDaily);
+    setPracticeModalOpen(true);
+  };
+
+  // Launch the actual quiz session
+  const handleLaunchPractice = (config) => {
+    setPracticeModalOpen(false);
+    setQuizConfig(config);
+  };
+
+  // If quiz is active, render full-screen quiz
+  if (quizConfig) {
+    return <QuizScreen config={quizConfig} onComplete={() => setQuizConfig(null)} />;
+  }
+
+  // If viewing the Rewards Vault, render the dedicated store page
+  if (activeView === 'redeem') {
+    return (
+      <RedeemStore
+        onBack={() => setActiveView('dashboard')}
+        onStartDrill={() => {
+          setActiveView('dashboard');
+          openPractice('math', false);
+        }}
+      />
+    );
+  }
+
+  // If viewing the Study Handbook (No XP, step-by-step derivations)
+  if (activeView === 'study') {
+    return (
+      <StudyBook
+        onBack={() => setActiveView('dashboard')}
+      />
+    );
+  }
+
+  const selectedCategory = CATEGORIES.find((c) => c.id === selectedCatId) || CATEGORIES[0];
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
+  const userName = user?.name || 'Explorer';
+  const xp = user?.xp ?? 0;
+  const streak = user?.streak ?? 0;
+  const level = user?.level ?? 1;
+  const nextLevelXP = level * 250;
+  const currentLevelBaseXP = (level - 1) * 250;
+  const levelProgress = Math.min(
+    100,
+    Math.max(0, Math.round(((xp - currentLevelBaseXP) / (nextLevelXP - currentLevelBaseXP)) * 100))
+  );
+
+  // Helper to ensure colors are readable in Light Mode
+  const getCatColor = (cat) => {
+    if (theme === 'light' && (cat?.color === '#C6FF45' || cat?.id === 'logic')) {
+      return '#15803D';
+    }
+    return cat?.color || '#FF9500';
+  };
 
   // Construct live sorted ranking list
   const rankingList = [...dbProfiles];
@@ -320,8 +320,8 @@ export default function Dashboard() {
           <div className="top-bar-inner">
             {/* Left: Brand Logo */}
             <div className="top-bar-left">
-              <div 
-                className="matiks-brand" 
+              <div
+                className="matiks-brand"
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               >
                 <span className="brand-title">
@@ -333,8 +333,8 @@ export default function Dashboard() {
             {/* Right: Stats + Profile Trigger */}
             <div className="top-bar-pills">
               {/* Flame Streak Pill */}
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="status-pill status-pill--streak"
                 onClick={() => setProfileDrawerOpen(true)}
                 title="Active Daily Streak"
@@ -344,8 +344,8 @@ export default function Dashboard() {
               </button>
 
               {/* XP Coin Pill (Opens Redeem Store) */}
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="status-pill status-pill--xp"
                 onClick={() => setActiveView('redeem')}
                 title="Total XP — Click to Redeem Rewards"
@@ -400,7 +400,7 @@ export default function Dashboard() {
         <section className="matiks-stories-section" aria-label="Contenders and Daily Event">
           <div className="matiks-stories-row">
             {/* Daily Event Glowing Circle */}
-            <div 
+            <div
               className="story-circle-item event-story"
               onClick={() => openPractice('puzzle', true)}
               role="button"
@@ -418,7 +418,7 @@ export default function Dashboard() {
             </div>
 
             {/* User Profile Circle */}
-            <div 
+            <div
               className="story-circle-item you-story"
               onClick={() => setProfileDrawerOpen(true)}
               role="button"
@@ -433,8 +433,8 @@ export default function Dashboard() {
 
             {/* Live Friends / Contenders */}
             {CONTENDERS.filter((c) => !c.isEvent && !c.isYou).map((friend) => (
-              <div 
-                key={friend.id} 
+              <div
+                key={friend.id}
                 className="story-circle-item friend-story"
                 onClick={() => openPractice('math', false)}
                 role="button"
@@ -464,7 +464,7 @@ export default function Dashboard() {
 
               <div className="challenge-cards-row">
                 {/* Card 1: PUZZLE */}
-                <div 
+                <div
                   className="challenge-snap-card card-purple"
                   onClick={() => handleLaunchPractice({ category: 'puzzle', count: 5, timed: true, isDailyChallenge: true })}
                   role="button"
@@ -481,7 +481,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Card 2: MATH */}
-                <div 
+                <div
                   className="challenge-snap-card card-orange"
                   onClick={() => handleLaunchPractice({ category: 'math', count: 5, timed: true, isDailyChallenge: true })}
                   role="button"
@@ -530,8 +530,8 @@ export default function Dashboard() {
               {/* Selected Featured Duel Card (SPRINT DUELS) */}
               <div className="selected-duel-card">
                 <div className="duel-card-header">
-                  <span 
-                    className="duel-badge-pill" 
+                  <span
+                    className="duel-badge-pill"
                     style={{ color: getCatColor(selectedCategory), borderColor: `${getCatColor(selectedCategory)}50` }}
                   >
                     {selectedCategory.tag}
@@ -565,8 +565,8 @@ export default function Dashboard() {
                   <Trophy size={16} className="text-lime" />
                   <span className="matiks-section-eyebrow">GLOBAL ARENA LEADERBOARD</span>
                 </div>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="leaderboard-rules-btn"
                   onClick={() => openRankInfo('rank')}
                   title="How rankings are calculated"
@@ -649,7 +649,7 @@ export default function Dashboard() {
             </section>
 
             {/* STUDY WORKBOOK LEARNING BANNER (Shifted from Training Modules, Zero XP) */}
-            <div 
+            <div
               className="modules-redeem-banner study-guide-banner"
               onClick={() => setActiveView('study')}
               role="button"
@@ -670,8 +670,8 @@ export default function Dashboard() {
                   </p>
                 </div>
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="modules-redeem-btn"
                 style={{ color: '#38BDF8', borderColor: 'rgba(56, 189, 248, 0.3)', background: 'rgba(56, 189, 248, 0.12)' }}
                 onClick={(e) => {
@@ -685,7 +685,7 @@ export default function Dashboard() {
             </div>
 
             {/* REDEEM XP VAULT BANNER (Under Training Modules & Numerical Velocity) */}
-            <div 
+            <div
               className="modules-redeem-banner"
               onClick={() => setActiveView('redeem')}
               role="button"
@@ -706,8 +706,8 @@ export default function Dashboard() {
                   </p>
                 </div>
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="modules-redeem-btn"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -742,16 +742,16 @@ export default function Dashboard() {
               </div>
 
               <div className="progress-bar progress-bar--slim">
-                <div 
-                  className="progress-fill fill-lime" 
+                <div
+                  className="progress-fill fill-lime"
                   style={{ width: `${levelProgress}%` }}
                 />
               </div>
 
               <div className="rank-widget-footer">
                 <span>Earn {Math.max(0, nextLevelXP - xp)} XP to level up</span>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="rank-badges-btn"
                   onClick={() => setBadgesModalOpen(true)}
                 >
@@ -764,8 +764,8 @@ export default function Dashboard() {
             <section className="matiks-section" aria-label="Ratings">
               <div className="section-title-wrap flex-between">
                 <span className="matiks-section-eyebrow">RATINGS</span>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="view-ratings-link"
                   onClick={() => setProfileDrawerOpen(true)}
                 >
@@ -778,8 +778,8 @@ export default function Dashboard() {
                 {CATEGORIES.slice(0, 4).map((cat) => {
                   const Icon = cat.icon;
                   return (
-                    <div 
-                      key={cat.id} 
+                    <div
+                      key={cat.id}
                       className={`rating-card ${activeRatingCatId === cat.id ? 'rating-card--active' : ''}`}
                       onClick={() => {
                         setActiveRatingCatId(cat.id);
@@ -868,9 +868,9 @@ export default function Dashboard() {
 
                 {/* SVG Sparkline Graph */}
                 <div className="chart-graph-wrapper">
-                  <svg 
-                    viewBox="0 0 400 120" 
-                    className="chart-svg" 
+                  <svg
+                    viewBox="0 0 400 120"
+                    className="chart-svg"
                     preserveAspectRatio="none"
                   >
                     <defs>
@@ -911,7 +911,7 @@ export default function Dashboard() {
 
             {/* REDEEM XP REWARDS STORE SHOWCASE CARD (Below Velocity Chart) */}
             <section className="matiks-section" aria-label="Redeem XP Store">
-              <div 
+              <div
                 className="redeem-xp-card"
                 onClick={() => setActiveView('redeem')}
                 role="button"
@@ -962,8 +962,8 @@ export default function Dashboard() {
                       <Zap size={14} /> {xp} XP
                     </span>
                   </div>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="redeem-open-btn"
                     onClick={(e) => {
                       e.stopPropagation();

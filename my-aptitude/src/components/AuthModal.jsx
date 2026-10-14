@@ -122,7 +122,7 @@ function OnboardingCarousel({ onDone, onSkip }) {
 }
 
 /* ── 100% Fast Login Component (No Email / No Password) ── */
-function FastLoginForm({ onSuccess, onGuest }) {
+function FastLoginForm({ onSuccess }) {
   const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');

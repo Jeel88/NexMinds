@@ -25,18 +25,6 @@ export default function Navbar({ onLogin, onSignup, currentView }) {
             </span>
           </a>
 
-          {/* Center: stat badges (hidden on landing without auth) */}
-          <div className="navbar-stats" aria-hidden="true">
-            <div className="stat-badge">
-              <Zap size={14} className="stat-icon stat-icon--xp" />
-              <span className="stat-label">0 XP</span>
-            </div>
-            <div className="stat-badge">
-              <Flame size={14} className="stat-icon stat-icon--streak" />
-              <span className="stat-label">0 Day Streak</span>
-            </div>
-          </div>
-
           {/* Auth buttons */}
           <div className="navbar-actions">
             <button

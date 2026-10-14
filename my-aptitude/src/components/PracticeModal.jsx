@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { X, Play, Clock, Zap, Flame } from 'lucide-react';
-import { FastForward, Puzzle, Crown, Hash } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { X, Play, Clock, Zap, Flame, FastForward, Puzzle, Crown, Hash } from 'lucide-react';
 import './PracticeModal.css';
 
 // Maps category id → display info
@@ -23,7 +21,6 @@ export default function PracticeModal({
   isDailyChallenge = false,
   onLaunchPractice,
 }) {
-  const { addXP } = useAuth();
   const [timed, setTimed] = useState(true);
   const [launching, setLaunching] = useState(false);
 

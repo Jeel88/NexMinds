@@ -9,14 +9,11 @@ import {
   Hash,
   ChevronRight,
   Gamepad2,
-  User,
   Sparkles,
-  BarChart3,
   ArrowUpRight,
   Play,
   Award,
   ChevronDown,
-  Target,
   Gift,
   BookOpen,
   Trophy,
@@ -35,13 +32,6 @@ import StudyBook from './StudyBook';
 import Footer from './Footer';
 import RankInfoModal from './RankInfoModal';
 import './Dashboard.css';
-
-// Default baseline contenders for arena podium
-const BASE_CONTENDERS = [
-  { id: 'c1', name: 'Aarav S.', xp: 100, level: 12, streak: 14, avatar: 'AS' },
-  { id: 'c2', name: 'Sophia K.', xp: 2610, level: 11, streak: 9, avatar: 'SK' },
-  { id: 'c3', name: 'Rohan M.', xp: 2450, level: 10, streak: 7, avatar: 'RM' },
-];
 
 // 5 Aptitude categories definitions
 const CATEGORIES = [
@@ -111,16 +101,6 @@ const CATEGORIES = [
   },
 ];
 
-// Friends / Contenders Story Circles
-const CONTENDERS = [
-  { id: 'daily-event', isEvent: true, label: '5 IN 02', timer: '06:14 HRS' },
-  { id: 'you', isYou: true, name: 'YOU', status: 'Online' },
-  { id: 'arhaan', name: 'ARHAAN', initial: 'A', online: true },
-  { id: 'tim', name: 'TIM', initial: 'T', online: true },
-  { id: 'sarah', name: 'SARAH', initial: 'S', online: false },
-  { id: 'marcus', name: 'MARCUS', initial: 'M', online: true },
-];
-
 export default function Dashboard() {
   const { user, theme, toggleTheme } = useAuth();
 
@@ -143,12 +123,6 @@ export default function Dashboard() {
   // Selected Aptitude category tab (defaults to MATH)
   const [selectedCatId, setSelectedCatId] = useState('math');
   const [isDailyChallengeMode, setIsDailyChallengeMode] = useState(false);
-
-  // Time filter for Ratings chart: 'all' | 'today' | '7days' | '30days'
-  const [chartFilter, setChartFilter] = useState('7days');
-
-  // Bottom active tab: 'arena' | 'drills' | 'ratings' | 'profile'
-  const [activeBottomNav, setActiveBottomNav] = useState('arena');
 
   // Live countdown timer for daily event
   const [timeLeft, setTimeLeft] = useState({ hours: 6, minutes: 14, seconds: 32 });
@@ -283,15 +257,12 @@ export default function Dashboard() {
     }
   }
 
-  // Supplement baseline contenders if fewer than 3 players exist
-  BASE_CONTENDERS.forEach((c) => {
-    if (rankingList.length < 3 && !rankingList.some((p) => p.name === c.name || p.id === c.id)) {
-      rankingList.push(c);
-    }
+  // Sort strictly by XP descending (real database contenders only)
+  rankingList.sort((a, b) => {
+    const xpDiff = (b.xp || 0) - (a.xp || 0);
+    if (xpDiff !== 0) return xpDiff;
+    return (b.streak || 0) - (a.streak || 0);
   });
-
-  // Sort strictly by XP descending
-  rankingList.sort((a, b) => (b.xp || 0) - (a.xp || 0));
 
   // Dynamic exact integer rank (1-indexed, no static strings)
   const myRankIndex = rankingList.findIndex((p) => p.id === user?.id || p.isYou);
@@ -431,20 +402,25 @@ export default function Dashboard() {
               <span className="story-label">YOU (LVL {level})</span>
             </div>
 
-            {/* Live Friends / Contenders */}
-            {CONTENDERS.filter((c) => !c.isEvent && !c.isYou).map((friend) => (
+            {/* Live Real Peers from Supabase Database */}
+            {dbProfiles.filter((p) => p.id !== user?.id).map((peer) => (
               <div
-                key={friend.id}
+                key={peer.id}
                 className="story-circle-item friend-story"
                 onClick={() => openPractice('math', false)}
                 role="button"
                 tabIndex={0}
+                title={`${peer.name || 'Contender'} • ${peer.xp || 0} XP`}
               >
                 <div className="friend-ring-circle">
-                  <span>{friend.initial}</span>
-                  {friend.online && <span className="friend-online-dot" />}
+                  {peer.avatar && peer.avatar.startsWith('http') ? (
+                    <img src={peer.avatar} alt={peer.name} className="friend-avatar-img" />
+                  ) : (
+                    <span>{(peer.name || 'P').substring(0, 2).toUpperCase()}</span>
+                  )}
+                  <span className="friend-online-dot" />
                 </div>
-                <span className="story-label">{friend.name}</span>
+                <span className="story-label">{peer.name?.split(' ')[0]?.toUpperCase() || 'PLAYER'}</span>
               </div>
             ))}
           </div>
@@ -564,6 +540,7 @@ export default function Dashboard() {
                 <div className="leaderboard-heading-row">
                   <Trophy size={16} className="text-lime" />
                   <span className="matiks-section-eyebrow">GLOBAL ARENA LEADERBOARD</span>
+                  <span className="leaderboard-count-pill">{rankingList.length} Ranked</span>
                 </div>
                 <button
                   type="button"
@@ -577,53 +554,184 @@ export default function Dashboard() {
               </div>
 
               <div className="leaderboard-card-shell">
-                {/* Dynamic Top 3 Podium Columns */}
-                <div className="leaderboard-podium-row">
-                  {/* #2 Rank */}
-                  {rankingList[1] && (
+                {/* Dynamic Podium: adapts cleanly whether 1, 2, or 3+ players */}
+                {rankingList.length >= 3 ? (
+                  <div className="leaderboard-podium-row podium-grid-3">
+                    {/* #2 Rank */}
                     <div className={`podium-card podium-2 ${rankingList[1].isYou ? 'podium-card--you' : ''}`}>
                       <span className="podium-medal">🥈</span>
                       <div className="podium-avatar">
-                        {rankingList[1].isYou
-                          ? userInitial
-                          : (rankingList[1].name?.substring(0, 2).toUpperCase() || 'P2')}
+                        {rankingList[1].avatar && rankingList[1].avatar.startsWith('http') ? (
+                          <img src={rankingList[1].avatar} alt={rankingList[1].name} className="podium-avatar-img" />
+                        ) : (
+                          rankingList[1].isYou ? userInitial : (rankingList[1].name?.substring(0, 2).toUpperCase() || 'P2')
+                        )}
                       </div>
                       <span className="podium-name">{rankingList[1].isYou ? 'YOU' : rankingList[1].name}</span>
                       <span className="podium-xp text-lime">{rankingList[1].xp?.toLocaleString()} XP</span>
                       <span className="podium-tier">{getTierInfo(rankingList[1].xp).tier}</span>
                     </div>
-                  )}
 
-                  {/* #1 Rank */}
-                  {rankingList[0] && (
+                    {/* #1 Rank (Center) */}
                     <div className={`podium-card podium-1 ${rankingList[0].isYou ? 'podium-card--you' : ''}`}>
                       <span className="podium-medal">👑</span>
                       <div className="podium-avatar podium-avatar--gold">
-                        {rankingList[0].isYou
-                          ? userInitial
-                          : (rankingList[0].name?.substring(0, 2).toUpperCase() || 'P1')}
+                        {rankingList[0].avatar && rankingList[0].avatar.startsWith('http') ? (
+                          <img src={rankingList[0].avatar} alt={rankingList[0].name} className="podium-avatar-img" />
+                        ) : (
+                          rankingList[0].isYou ? userInitial : (rankingList[0].name?.substring(0, 2).toUpperCase() || 'P1')
+                        )}
                       </div>
                       <span className="podium-name">{rankingList[0].isYou ? 'YOU' : rankingList[0].name}</span>
                       <span className="podium-xp text-lime">{rankingList[0].xp?.toLocaleString()} XP</span>
                       <span className="podium-tier podium-tier--gold">{getTierInfo(rankingList[0].xp).tier}</span>
                     </div>
-                  )}
 
-                  {/* #3 Rank */}
-                  {rankingList[2] && (
+                    {/* #3 Rank */}
                     <div className={`podium-card podium-3 ${rankingList[2].isYou ? 'podium-card--you' : ''}`}>
                       <span className="podium-medal">🥉</span>
                       <div className="podium-avatar">
-                        {rankingList[2].isYou
-                          ? userInitial
-                          : (rankingList[2].name?.substring(0, 2).toUpperCase() || 'P3')}
+                        {rankingList[2].avatar && rankingList[2].avatar.startsWith('http') ? (
+                          <img src={rankingList[2].avatar} alt={rankingList[2].name} className="podium-avatar-img" />
+                        ) : (
+                          rankingList[2].isYou ? userInitial : (rankingList[2].name?.substring(0, 2).toUpperCase() || 'P3')
+                        )}
                       </div>
                       <span className="podium-name">{rankingList[2].isYou ? 'YOU' : rankingList[2].name}</span>
                       <span className="podium-xp text-lime">{rankingList[2].xp?.toLocaleString()} XP</span>
                       <span className="podium-tier">{getTierInfo(rankingList[2].xp).tier}</span>
                     </div>
-                  )}
-                </div>
+                  </div>
+                ) : rankingList.length === 2 ? (
+                  <div className="leaderboard-podium-row podium-grid-2">
+                    {/* #1 Rank */}
+                    <div className={`podium-card podium-1 ${rankingList[0].isYou ? 'podium-card--you' : ''}`}>
+                      <span className="podium-medal">👑</span>
+                      <div className="podium-avatar podium-avatar--gold">
+                        {rankingList[0].avatar && rankingList[0].avatar.startsWith('http') ? (
+                          <img src={rankingList[0].avatar} alt={rankingList[0].name} className="podium-avatar-img" />
+                        ) : (
+                          rankingList[0].isYou ? userInitial : (rankingList[0].name?.substring(0, 2).toUpperCase() || 'P1')
+                        )}
+                      </div>
+                      <span className="podium-name">{rankingList[0].isYou ? 'YOU' : rankingList[0].name}</span>
+                      <span className="podium-xp text-lime">{rankingList[0].xp?.toLocaleString()} XP</span>
+                      <span className="podium-tier podium-tier--gold">{getTierInfo(rankingList[0].xp).tier}</span>
+                    </div>
+
+                    {/* #2 Rank */}
+                    <div className={`podium-card podium-2 ${rankingList[1].isYou ? 'podium-card--you' : ''}`}>
+                      <span className="podium-medal">🥈</span>
+                      <div className="podium-avatar">
+                        {rankingList[1].avatar && rankingList[1].avatar.startsWith('http') ? (
+                          <img src={rankingList[1].avatar} alt={rankingList[1].name} className="podium-avatar-img" />
+                        ) : (
+                          rankingList[1].isYou ? userInitial : (rankingList[1].name?.substring(0, 2).toUpperCase() || 'P2')
+                        )}
+                      </div>
+                      <span className="podium-name">{rankingList[1].isYou ? 'YOU' : rankingList[1].name}</span>
+                      <span className="podium-xp text-lime">{rankingList[1].xp?.toLocaleString()} XP</span>
+                      <span className="podium-tier">{getTierInfo(rankingList[1].xp).tier}</span>
+                    </div>
+                  </div>
+                ) : rankingList.length === 1 ? (
+                  <div className="leaderboard-podium-row podium-grid-1">
+                    <div className={`podium-card podium-1 podium-solo ${rankingList[0].isYou ? 'podium-card--you' : ''}`}>
+                      <span className="podium-medal">👑</span>
+                      <div className="podium-avatar podium-avatar--gold">
+                        {rankingList[0].avatar && rankingList[0].avatar.startsWith('http') ? (
+                          <img src={rankingList[0].avatar} alt={rankingList[0].name} className="podium-avatar-img" />
+                        ) : (
+                          rankingList[0].isYou ? userInitial : (rankingList[0].name?.substring(0, 2).toUpperCase() || 'P1')
+                        )}
+                      </div>
+                      <span className="podium-name">{rankingList[0].isYou ? 'YOU' : rankingList[0].name}</span>
+                      <span className="podium-xp text-lime">{rankingList[0].xp?.toLocaleString()} XP</span>
+                      <span className="podium-tier podium-tier--gold">{getTierInfo(rankingList[0].xp).tier}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="leaderboard-empty-state">
+                    <Trophy size={32} className="text-lime" />
+                    <p>No contenders yet. Complete drills to claim #1 on the leaderboard!</p>
+                  </div>
+                )}
+
+                {/* Divided Contenders List / Table */}
+                {rankingList.length > 0 && (
+                  <div className="leaderboard-table-wrap">
+                    <div className="leaderboard-table-header">
+                      <span className="th-col th-rank">RANK</span>
+                      <span className="th-col th-player">THINKER</span>
+                      <span className="th-col th-tier">TIER</span>
+                      <span className="th-col th-streak">STREAK</span>
+                      <span className="th-col th-xp">XP</span>
+                    </div>
+
+                    <div className="leaderboard-table-body">
+                      {rankingList.map((player, idx) => {
+                        const rankNum = idx + 1;
+                        const isYou = player.isYou;
+                        const tierInfo = getTierInfo(player.xp || 0);
+                        const initial = (player.name || 'U').substring(0, 2).toUpperCase();
+
+                        return (
+                          <div
+                            key={player.id || idx}
+                            className={`leaderboard-row ${isYou ? 'leaderboard-row--you' : ''}`}
+                          >
+                            <div className="td-col td-rank">
+                              {rankNum === 1 ? (
+                                <span className="rank-num-badge rank-gold">👑 #1</span>
+                              ) : rankNum === 2 ? (
+                                <span className="rank-num-badge rank-silver">🥈 #2</span>
+                              ) : rankNum === 3 ? (
+                                <span className="rank-num-badge rank-bronze">🥉 #3</span>
+                              ) : (
+                                <span className="rank-num-badge rank-default">#{rankNum}</span>
+                              )}
+                            </div>
+
+                            <div className="td-col td-player">
+                              <div className="td-player-avatar">
+                                {player.avatar && player.avatar.startsWith('http') ? (
+                                  <img src={player.avatar} alt={player.name} className="td-avatar-img" />
+                                ) : (
+                                  <span>{isYou ? userInitial : initial}</span>
+                                )}
+                              </div>
+                              <div className="td-player-meta">
+                                <div className="td-player-name-row">
+                                  <span className="td-player-name">{player.name || 'Explorer'}</span>
+                                  {isYou && <span className="td-you-pill">YOU</span>}
+                                </div>
+                                <span className="td-player-sub">Level {player.level || 1} Thinker</span>
+                              </div>
+                            </div>
+
+                            <div className="td-col td-tier">
+                              <span className="td-tier-pill">{tierInfo.tier}</span>
+                            </div>
+
+                            <div className="td-col td-streak">
+                              <span className="td-streak-pill">
+                                <Flame size={12} className="text-orange" />
+                                <span>{player.streak || 0}d</span>
+                              </span>
+                            </div>
+
+                            <div className="td-col td-xp">
+                              <span className="td-xp-val text-lime">
+                                <Zap size={13} />
+                                {(player.xp || 0).toLocaleString()} XP
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Dynamic User Standing Row */}
                 <div className="leaderboard-user-strip">
@@ -631,7 +739,13 @@ export default function Dashboard() {
                     <span>{standing.rank}</span>
                   </div>
                   <div className="strip-user-info">
-                    <div className="strip-avatar">{userInitial}</div>
+                    <div className="strip-avatar">
+                      {user?.avatar && user.avatar.startsWith('http') ? (
+                        <img src={user.avatar} alt="You" className="strip-avatar-img" />
+                      ) : (
+                        userInitial
+                      )}
+                    </div>
                     <div>
                       <div className="strip-name-row">
                         <strong>YOU ({userName.split(' ')[0]})</strong>
@@ -641,7 +755,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="strip-stats">
-                    <span className="strip-xp-val text-lime">{xp} XP</span>
+                    <span className="strip-xp-val text-lime">{xp.toLocaleString()} XP</span>
                     <span className="strip-tier-label">{standing.tier}</span>
                   </div>
                 </div>

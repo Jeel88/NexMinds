@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { 
-  ArrowLeft, Gift, Zap, Shield, Sparkles, Check, Copy, Lock, 
-  ChevronRight, X, CheckCircle2, AlertCircle, ShoppingBag, 
-  ExternalLink, ArrowUpRight, Flame
+  ArrowLeft, Gift, Zap, Sparkles, Check, Copy, Lock, 
+  ChevronRight, X, CheckCircle2, AlertCircle, ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './RedeemStore.css';

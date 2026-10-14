@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, CheckCircle2, XCircle, ChevronRight, Home, Clock, Share2, Sparkles } from 'lucide-react';
-import { FastForward, Puzzle, Crown, Hash } from 'lucide-react';
+import {
+  X, CheckCircle2, XCircle, ChevronRight, Home, Clock, Share2, Sparkles,
+  FastForward, Puzzle, Crown, Hash
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './QuizScreen.css';
 
@@ -186,10 +188,20 @@ export default function QuizScreen({ config = {}, onComplete }) {
   const isAnswered = selected !== null;
   const isLastQ = qIndex >= (questions.length || 1) - 1;
 
+  const handleAnswer = (idx) => {
+    if (isAnswered) return;
+    setSelected(idx);
+    const isCorrect = idx === currentQ.answer;
+    setAnswers(prev => [...prev, { selected: idx, correct: currentQ.answer, isCorrect }]);
+  };
+
   /* Timer countdown */
   useEffect(() => {
     if (!timed || isAnswered || phase !== 'quiz') return;
-    if (timer <= 0) { handleAnswer(-1); return; }
+    if (timer <= 0) {
+      handleAnswer(-1);
+      return;
+    }
     const t = setTimeout(() => setTimer(s => s - 1), 1000);
     return () => clearTimeout(t);
   }, [timer, timed, isAnswered, phase]);
@@ -200,13 +212,6 @@ export default function QuizScreen({ config = {}, onComplete }) {
     setSelected(null);
     setAnimKey(k => k + 1);
   }, [qIndex]);
-
-  const handleAnswer = (idx) => {
-    if (isAnswered) return;
-    setSelected(idx);
-    const isCorrect = idx === currentQ.answer;
-    setAnswers(prev => [...prev, { selected: idx, correct: currentQ.answer, isCorrect }]);
-  };
 
   const handleNext = () => {
     if (isLastQ) {
@@ -343,7 +348,6 @@ export default function QuizScreen({ config = {}, onComplete }) {
 
 /* ─── Results Screen ────────────────────────────────────────── */
 function ResultsScreen({ score, total, accuracy, xpEarned, baseXP, meta, answers, questions, isDailyChallenge, onBack }) {
-  const { Icon } = meta;
   const [copied, setCopied] = useState(false);
 
   const getRating = () => {

@@ -31,7 +31,6 @@ export default function Footer({
           {/* Column 1: Brand & Database Sync */}
           <div className="footer-col footer-col--brand">
             <div className="footer-brand" onClick={scrollToTop}>
-              <div className="brand-dot-pulse" />
               <span className="brand-title">
                 My<span className="brand-accent">Aptitude</span>
               </span>

@@ -63,51 +63,10 @@
   color: #C6FF45;
 }
 
-/* Stat badges */
-.navbar-stats {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stat-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(30, 26, 38, 0.8);
-  border: 1px solid #2D2738;
-  border-radius: 9999px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #A8A5AF;
-  transition: all 0.2s ease;
-}
-
-.stat-badge:hover {
-  border-color: #3D3648;
-  color: #ffffff;
-}
-
-.stat-icon--xp    { color: #C6FF45; }
-.stat-icon--streak { color: #F59E0B; }
-
-.stat-label { 
-  font-variant-numeric: tabular-nums;
-}
-
 /* Actions */
 .navbar-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-  .navbar-stats {
-    display: none;
-  }
 }

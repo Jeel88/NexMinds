@@ -106,24 +106,15 @@ export default function LandingPage({ onLogin, onSignup }) {
             every exam that stands between you and your goals.
           </p>
 
-          {/* CTA buttons */}
+          {/* CTA button */}
           <div className="hero-cta animate-fadeInUp delay-300">
             <button
               id="hero-start-btn"
               className="btn btn-primary btn-xl"
               onClick={onSignup}
-              aria-label="Create a free account"
+              aria-label="Get Started"
             >
-              <Zap size={20} />
-              Start Fast Login
-            </button>
-            <button
-              id="hero-fast-login-btn"
-              className="btn btn-secondary btn-lg"
-              onClick={onLogin}
-              aria-label="Fast Login with Google"
-            >
-              1-Tap Google Login
+              Get Started Free
               <ArrowRight size={18} />
             </button>
           </div>

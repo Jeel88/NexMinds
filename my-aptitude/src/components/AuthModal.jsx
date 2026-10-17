@@ -144,13 +144,13 @@ function FastLoginForm({ onSuccess }) {
   };
 
   return (
-    <div className="fast-auth-container" aria-label="Fast Login">
+    <div className="fast-auth-container" aria-label="Sign In">
       <div className="auth-form-header">
         <div className="auth-form-logo fast-logo-glow">
           <Brain size={26} strokeWidth={2.5} />
         </div>
-        <h2 className="auth-form-title">Fast Login</h2>
-        <p className="auth-form-subtitle">One-tap instant access to your aptitude training</p>
+        <h2 className="auth-form-title">Welcome to MyAptitude</h2>
+        <p className="auth-form-subtitle">Instant, passwordless sign-in with your Google account</p>
       </div>
 
       {/* Benefits checklist */}
@@ -160,7 +160,7 @@ function FastLoginForm({ onSuccess }) {
             <Zap size={16} />
           </div>
           <div className="fast-perk-text">
-            <strong>1-Tap Instant Access</strong>
+            <strong>Instant Access</strong>
             <span>No passwords to remember or type</span>
           </div>
         </div>
@@ -171,7 +171,7 @@ function FastLoginForm({ onSuccess }) {
           </div>
           <div className="fast-perk-text">
             <strong>Sync Streaks & XP</strong>
-            <span>Securely saved in Supabase database</span>
+            <span>Progress automatically saved in the cloud</span>
           </div>
         </div>
 
@@ -181,7 +181,7 @@ function FastLoginForm({ onSuccess }) {
           </div>
           <div className="fast-perk-text">
             <strong>Official Google OAuth</strong>
-            <span>Enterprise-grade authentication & privacy</span>
+            <span>Safe, secure & verified authentication</span>
           </div>
         </div>
       </div>
@@ -192,7 +192,7 @@ function FastLoginForm({ onSuccess }) {
         </div>
       )}
 
-      {/* The Sole Primary Action: Fast Login with Google */}
+      {/* Single Google Sign In Action */}
       <button
         type="button"
         id="google-fast-login-btn"
@@ -206,8 +206,7 @@ function FastLoginForm({ onSuccess }) {
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
         </svg>
-        <span>{loading ? 'Connecting Google...' : 'Fast Login with Google'}</span>
-        <span className="fast-tag">1-TAP</span>
+        <span>{loading ? 'Connecting with Google...' : 'Continue with Google'}</span>
       </button>
 
       <p className="fast-auth-footnote">

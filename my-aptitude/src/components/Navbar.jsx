@@ -25,17 +25,10 @@ export default function Navbar({ onLogin, onSignup, currentView }) {
             </span>
           </a>
 
-          {/* Auth buttons */}
+          {/* Auth action */}
           <div className="navbar-actions">
             <button
-              id="nav-login-btn"
-              className="btn btn-ghost btn-sm"
-              onClick={onLogin}
-            >
-              Log in
-            </button>
-            <button
-              id="nav-signup-btn"
+              id="nav-get-started-btn"
               className="btn btn-primary btn-sm"
               onClick={onSignup}
             >

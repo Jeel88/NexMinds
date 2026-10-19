@@ -156,7 +156,7 @@ const TIMED_SECS = 30;
 
 /* ─── Main Quiz Screen ──────────────────────────────────────── */
 export default function QuizScreen({ config = {}, onComplete }) {
-  const { addXP, theme } = useAuth();
+  const { addXP, recordQuizResult, theme } = useAuth();
   const category = (config?.category || 'math').toLowerCase();
   const timed = config?.timed ?? true;
   const isDailyChallenge = config?.isDailyChallenge ?? false;
@@ -225,6 +225,13 @@ export default function QuizScreen({ config = {}, onComplete }) {
         if (xpEarned > 0) {
           addXP(xpEarned);
         }
+        // Dynamically update category rating in profile and Supabase DB
+        recordQuizResult?.({
+          category,
+          score: correctCount,
+          total: totalQs,
+          xpEarned,
+        });
       }
       setPhase('results');
     } else {

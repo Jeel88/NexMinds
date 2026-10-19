@@ -259,6 +259,22 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 10px rgba(198, 255, 69, 0.2);
+  overflow: visible;
+}
+
+.header-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.avatar-initial-fallback {
+  position: relative;
+  z-index: 0;
 }
 
 .online-beacon {
@@ -385,7 +401,8 @@
   min-height: 58px;
   border-radius: 50%;
   background: #3B2E58;
-  border: 2px solid #63518A;
+  border: 2px solid #C6FF45;
+  box-shadow: 0 0 14px rgba(198, 255, 69, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -394,6 +411,23 @@
   font-weight: 800;
   color: #FFFFFF;
   flex-shrink: 0;
+  overflow: visible;
+}
+
+.user-ring-avatar-img,
+.friend-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.user-avatar-initial-fallback {
+  position: relative;
+  z-index: 0;
 }
 
 .user-active-dot {
@@ -405,6 +439,8 @@
   border-radius: 50%;
   background: #22C55E;
   border: 2px solid #0D0A14;
+  z-index: 2;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
 }
 
 .friend-ring-circle {
@@ -424,6 +460,7 @@
   font-weight: 700;
   color: #A8A5AF;
   flex-shrink: 0;
+  overflow: visible;
 }
 
 .friend-online-dot {
@@ -435,6 +472,7 @@
   border-radius: 50%;
   background: #22C55E;
   border: 2px solid #0D0A14;
+  z-index: 2;
 }
 
 .story-label {
@@ -977,6 +1015,10 @@
   font-size: 0.625rem;
   font-weight: 700;
   color: #22C55E;
+}
+
+.rating-trend-tag--down {
+  color: #EF4444;
 }
 
 /* Stats Overview 2x2 Grid */

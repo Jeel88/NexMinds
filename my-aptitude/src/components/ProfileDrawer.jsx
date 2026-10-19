@@ -138,7 +138,18 @@ export default function ProfileDrawer({
           <div className="drawer-bio-card">
             <div className="drawer-avatar-wrap">
               <div className="drawer-avatar">
-                {userInitial}
+                {user?.avatar && user.avatar.startsWith('http') ? (
+                  <img
+                    src={user.avatar}
+                    alt={user?.name || 'User'}
+                    className="drawer-avatar-img"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                <span className="drawer-avatar-initial">{userInitial}</span>
               </div>
               <span className="drawer-avatar-badge" title="Active">
                 <ShieldCheck size={12} />
@@ -230,6 +241,36 @@ export default function ProfileDrawer({
                     {val} XP
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Dynamic Ratings Snapshot */}
+            <div className="drawer-ratings-box">
+              <div className="drawer-goal-header">
+                <span className="goal-label">
+                  <Award size={14} className="text-accent" /> Dynamic Ratings
+                </span>
+                <span className="goal-value" style={{ color: '#C6FF45' }}>
+                  AVG {Math.round(((user?.ratings?.math || 1200) + (user?.ratings?.puzzle || 1200) + (user?.ratings?.logic || 1200) + (user?.ratings?.memory || 1200)) / 4)}
+                </span>
+              </div>
+              <div className="drawer-ratings-mini-grid">
+                <div className="dr-mini-item">
+                  <span className="dr-mini-val" style={{ color: '#FF9500' }}>{user?.ratings?.math ?? 1200}</span>
+                  <span className="dr-mini-lbl">Math</span>
+                </div>
+                <div className="dr-mini-item">
+                  <span className="dr-mini-val" style={{ color: '#A855F7' }}>{user?.ratings?.puzzle ?? 1200}</span>
+                  <span className="dr-mini-lbl">Puzzle</span>
+                </div>
+                <div className="dr-mini-item">
+                  <span className="dr-mini-val" style={{ color: '#C6FF45' }}>{user?.ratings?.logic ?? 1200}</span>
+                  <span className="dr-mini-lbl">Logic</span>
+                </div>
+                <div className="dr-mini-item">
+                  <span className="dr-mini-val" style={{ color: '#38BDF8' }}>{user?.ratings?.memory ?? 1200}</span>
+                  <span className="dr-mini-lbl">Numerical</span>
+                </div>
               </div>
             </div>
           </div>

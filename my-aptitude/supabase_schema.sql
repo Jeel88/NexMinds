@@ -23,6 +23,8 @@ alter table public.profiles add column if not exists today_xp integer default 0 
 alter table public.profiles add column if not exists sessions_count integer default 0 not null;
 alter table public.profiles add column if not exists created_at timestamp with time zone default now();
 alter table public.profiles add column if not exists updated_at timestamp with time zone default now();
+alter table public.profiles add column if not exists ratings jsonb default '{"math": 1200, "puzzle": 1200, "logic": 1200, "memory": 1200}'::jsonb;
+alter table public.profiles add column if not exists rating_trends jsonb default '{"math": "+0 —", "puzzle": "+0 —", "logic": "+0 —", "memory": "+0 —"}'::jsonb;
 
 -- 3. Enable Row Level Security (RLS)
 alter table public.profiles enable row level security;
@@ -68,6 +70,8 @@ begin
     streak, 
     today_xp, 
     sessions_count, 
+    ratings,
+    rating_trends,
     created_at, 
     updated_at
   )
@@ -83,6 +87,8 @@ begin
     0,
     0,
     0,
+    coalesce(new.raw_user_meta_data->'ratings', '{"math": 1200, "puzzle": 1200, "logic": 1200, "memory": 1200}'::jsonb),
+    coalesce(new.raw_user_meta_data->'rating_trends', '{"math": "+0 —", "puzzle": "+0 —", "logic": "+0 —", "memory": "+0 —"}'::jsonb),
     now(),
     now()
   )
@@ -90,6 +96,8 @@ begin
     name = coalesce(public.profiles.name, excluded.name),
     avatar = coalesce(public.profiles.avatar, excluded.avatar),
     email = coalesce(public.profiles.email, excluded.email),
+    ratings = coalesce(public.profiles.ratings, excluded.ratings),
+    rating_trends = coalesce(public.profiles.rating_trends, excluded.rating_trends),
     updated_at = now();
   return new;
 end;
@@ -113,6 +121,8 @@ insert into public.profiles (
   streak, 
   today_xp, 
   sessions_count, 
+  ratings,
+  rating_trends,
   created_at, 
   updated_at
 )
@@ -128,6 +138,8 @@ select
   0,
   0,
   0,
+  coalesce(u.raw_user_meta_data->'ratings', '{"math": 1200, "puzzle": 1200, "logic": 1200, "memory": 1200}'::jsonb),
+  coalesce(u.raw_user_meta_data->'rating_trends', '{"math": "+0 —", "puzzle": "+0 —", "logic": "+0 —", "memory": "+0 —"}'::jsonb),
   now(),
   now()
 from auth.users u
@@ -135,3 +147,11 @@ where not exists (
   select 1 from public.profiles p where p.id = u.id
 )
 on conflict (id) do nothing;
+
+-- 8. Backfill default ratings for any existing profiles that have null ratings
+update public.profiles
+set
+  ratings = coalesce(ratings, '{"math": 1200, "puzzle": 1200, "logic": 1200, "memory": 1200}'::jsonb),
+  rating_trends = coalesce(rating_trends, '{"math": "+0 —", "puzzle": "+0 —", "logic": "+0 —", "memory": "+0 —"}'::jsonb)
+where ratings is null or rating_trends is null;
+

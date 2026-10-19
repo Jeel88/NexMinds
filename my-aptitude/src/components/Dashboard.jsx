@@ -41,8 +41,8 @@ const CATEGORIES = [
     fullName: 'Quantitative Aptitude',
     icon: FastForward,
     color: '#FF9500',
-    rating: 2346,
-    trend: '+42 ↑',
+    rating: 1200,
+    trend: '+0 —',
     tag: 'MATH SPRINT',
     title: 'SPRINT DUELS',
     subtitle: 'RACE TO SOLVE 5 QUESTIONS IN 2 MINS',
@@ -57,8 +57,8 @@ const CATEGORIES = [
     fullName: 'Pattern Recognition',
     icon: Puzzle,
     color: '#A855F7',
-    rating: 2006,
-    trend: '+65 ↑',
+    rating: 1200,
+    trend: '+0 —',
     tag: 'SPATIAL PUZZLE',
     title: 'MATRIX ROTATION',
     subtitle: 'IDENTIFY NEXT SHAPE IN THE SEQUENCE',
@@ -73,8 +73,8 @@ const CATEGORIES = [
     fullName: 'Logical Reasoning',
     icon: Crown,
     color: '#C6FF45',
-    rating: 1850,
-    trend: '+18 ↑',
+    rating: 1200,
+    trend: '+0 —',
     tag: 'LOGIC BLITZ',
     title: 'SYLLOGISM ARENA',
     subtitle: 'TEST RAPID CONDITIONAL DEDUCTIONS',
@@ -89,8 +89,8 @@ const CATEGORIES = [
     fullName: 'Numerical Memory & Agility',
     icon: Hash,
     color: '#38BDF8',
-    rating: 1920,
-    trend: '+24 ↑',
+    rating: 1200,
+    trend: '+0 —',
     tag: 'NUMBER FLASH',
     title: 'SERIES VELOCITY',
     subtitle: 'COMPLETE FAST NUMBER SERIES RUNS',
@@ -349,7 +349,18 @@ export default function Dashboard() {
                 aria-label="Open Profile Drawer"
               >
                 <div className="avatar-circle">
-                  {userInitial}
+                  {user?.avatar && user.avatar.startsWith('http') ? (
+                    <img 
+                      src={user.avatar} 
+                      alt={userName} 
+                      className="header-avatar-img"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : null}
+                  <span className="avatar-initial-fallback">{userInitial}</span>
                   <span className="online-beacon" />
                 </div>
                 <div className="desktop-user-meta desktop-only">
@@ -396,7 +407,18 @@ export default function Dashboard() {
               tabIndex={0}
             >
               <div className="user-ring-circle">
-                <span>{userInitial}</span>
+                {user?.avatar && user.avatar.startsWith('http') ? (
+                  <img
+                    src={user.avatar}
+                    alt={userName}
+                    className="user-ring-avatar-img"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                <span className="user-avatar-initial-fallback">{userInitial}</span>
                 <span className="user-active-dot" />
               </div>
               <span className="story-label">YOU (LVL {level})</span>
@@ -414,7 +436,15 @@ export default function Dashboard() {
               >
                 <div className="friend-ring-circle">
                   {peer.avatar && peer.avatar.startsWith('http') ? (
-                    <img src={peer.avatar} alt={peer.name} className="friend-avatar-img" />
+                    <img 
+                      src={peer.avatar} 
+                      alt={peer.name} 
+                      className="friend-avatar-img"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   ) : (
                     <span>{(peer.name || 'P').substring(0, 2).toUpperCase()}</span>
                   )}
@@ -891,6 +921,8 @@ export default function Dashboard() {
               <div className="ratings-grid-4">
                 {CATEGORIES.slice(0, 4).map((cat) => {
                   const Icon = cat.icon;
+                  const dynamicRating = user?.ratings?.[cat.id] ?? cat.rating ?? 1200;
+                  const dynamicTrend = user?.ratingTrends?.[cat.id] ?? cat.trend ?? '+0 —';
                   return (
                     <div
                       key={cat.id}
@@ -903,11 +935,13 @@ export default function Dashboard() {
                       tabIndex={0}
                     >
                       <div className="rating-card-top">
-                        <span className="rating-val">{cat.rating}</span>
+                        <span className="rating-val">{dynamicRating}</span>
                         <Icon size={16} className="rating-icon" style={{ color: cat.color }} />
                       </div>
                       <span className="rating-cat-name">{cat.name}</span>
-                      <span className="rating-trend-tag">{cat.trend}</span>
+                      <span className={`rating-trend-tag ${dynamicTrend.includes('↓') ? 'rating-trend-tag--down' : ''}`}>
+                        {dynamicTrend}
+                      </span>
                     </div>
                   );
                 })}

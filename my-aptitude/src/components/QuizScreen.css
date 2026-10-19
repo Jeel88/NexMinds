@@ -56,6 +56,20 @@
   text-transform: uppercase;
 }
 
+.qs-db-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin-left: 4px;
+}
+
 .qs-right-header {
   display: flex;
   align-items: center;

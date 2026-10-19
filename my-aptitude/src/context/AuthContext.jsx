@@ -171,6 +171,7 @@ export function AuthProvider({ children }) {
           todayXP: data.today_xp ?? 0,
           accuracy: data.accuracy ?? 100,
           sessionsCount: data.sessions_count ?? 0,
+          weekly_xp: data.weekly_xp || null,
           ratings: resolvedRatings,
           ratingTrends: resolvedTrends,
           soundEnabled: true,
@@ -470,6 +471,9 @@ export function AuthProvider({ children }) {
 
   const addXP = async (amount) => {
     if (!amount || amount <= 0) return;
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const currentDay = dayNames[new Date().getDay()]; // 'Mon', 'Tue', etc.
+
     setUser((prev) => {
       if (!prev) return null;
       const newXP = (prev.xp || 0) + amount;
@@ -477,6 +481,13 @@ export function AuthProvider({ children }) {
       const newLevel = Math.max(1, Math.floor(newXP / 250) + 1);
       const newStreak = (prev.streak || 0) === 0 ? 1 : prev.streak;
       const newSessions = (prev.sessionsCount || 0) + 1;
+
+      const currentWeek = (prev.weekly_xp && typeof prev.weekly_xp === 'object') ? { ...prev.weekly_xp } : {};
+      currentWeek[currentDay] = (Number(currentWeek[currentDay]) || 0) + amount;
+
+      try {
+        localStorage.setItem(`myaptitude_week_${prev.id || 'demo'}`, JSON.stringify(currentWeek));
+      } catch {}
 
       // Persist to Supabase DB profiles dynamically
       if (isSupabaseConfigured() && prev.id && !prev.isGuest) {
@@ -492,13 +503,12 @@ export function AuthProvider({ children }) {
             today_xp: newTodayXP,
             streak: newStreak,
             sessions_count: newSessions,
+            weekly_xp: currentWeek,
             updated_at: new Date().toISOString()
           }, { onConflict: 'id' })
           .then(({ error }) => {
             if (error) {
               console.warn('[Supabase Profiles Upsert Warning]:', error.message);
-            } else {
-              console.log('[Supabase Profiles Synced]: +', amount, 'XP -> Total:', newXP);
             }
           })
           .catch((err) => console.warn('Supabase DB update failed:', err));
@@ -511,6 +521,7 @@ export function AuthProvider({ children }) {
         level: newLevel,
         streak: newStreak,
         sessionsCount: newSessions,
+        weekly_xp: currentWeek,
       };
     });
   };

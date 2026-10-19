@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   X, CheckCircle2, XCircle, ChevronRight, Home, Clock, Share2, Sparkles,
-  FastForward, Puzzle, Crown, Hash
+  FastForward, Puzzle, Crown, Hash, Database
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import './QuizScreen.css';
 
 /* ─── Confetti Particle Canvas ──────────────────────────────── */
@@ -166,9 +167,15 @@ export default function QuizScreen({ config = {}, onComplete }) {
   const meta = { ...rawMeta, color: activeColor };
   const Icon = meta.Icon || meta.icon || FastForward;
 
-  const questions = (QUESTIONS[category] && QUESTIONS[category].length > 0)
-    ? QUESTIONS[category]
-    : (QUESTIONS.math || []);
+  // Base questions fallback from built-in question bank
+  const getInitialQuestions = (cat) => {
+    return (QUESTIONS[cat] && QUESTIONS[cat].length > 0)
+      ? QUESTIONS[cat]
+      : (QUESTIONS.math || []);
+  };
+
+  const [questions, setQuestions] = useState(() => getInitialQuestions(category));
+  const [isDbQuestion, setIsDbQuestion] = useState(false);
   const xpAwardedRef = useRef(false);
 
   const [qIndex,    setQIndex]    = useState(0);
@@ -177,6 +184,66 @@ export default function QuizScreen({ config = {}, onComplete }) {
   const [timer,     setTimer]     = useState(TIMED_SECS);
   const [phase,     setPhase]     = useState('quiz'); // 'quiz' | 'results'
   const [animKey,   setAnimKey]   = useState(0); // re-triggers slide-in
+
+  // Dynamically fetch questions from Supabase public.questions table
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDbQuestions = async () => {
+      if (!isSupabaseConfigured()) return;
+      try {
+        const cat = category.toLowerCase();
+        const validCats = [cat];
+        if (cat === 'math' || cat === 'quantitative') validCats.push('math', 'quantitative');
+        if (cat === 'puzzle' || cat === 'pattern') validCats.push('puzzle', 'pattern');
+        if (cat === 'logic' || cat === 'logical') validCats.push('logic', 'logical');
+        if (cat === 'memory' || cat === 'numerical') validCats.push('memory', 'numerical');
+
+        const { data, error } = await supabase
+          .from('questions')
+          .select('*')
+          .in('category', validCats)
+          .limit(30);
+
+        if (error) {
+          console.warn('[QuizScreen] DB questions fetch note (using fallback):', error.message);
+          return;
+        }
+
+        if (data && data.length > 0 && isMounted) {
+          const parsed = data
+            .map(row => ({
+              id: row.id,
+              q: row.question || row.q,
+              options: Array.isArray(row.options)
+                ? row.options
+                : (typeof row.options === 'string' ? JSON.parse(row.options) : []),
+              answer: typeof row.answer_index === 'number'
+                ? row.answer_index
+                : (typeof row.answer === 'number' ? row.answer : 0),
+              explanation: row.explanation || '',
+              difficulty: row.difficulty || 'medium',
+              isFromDb: true,
+            }))
+            .filter(item => item.q && Array.isArray(item.options) && item.options.length >= 2);
+
+          if (parsed.length > 0 && isMounted) {
+            // Randomize and select 5 questions
+            const shuffled = [...parsed].sort(() => 0.5 - Math.random()).slice(0, 5);
+            setQuestions(prev => {
+              // Only swap if quiz hasn't progressed to answer stage
+              return (qIndex === 0 && selected === null) ? shuffled : prev;
+            });
+            setIsDbQuestion(true);
+          }
+        }
+      } catch (err) {
+        console.warn('[QuizScreen] Exception fetching questions from DB:', err);
+      }
+    };
+
+    fetchDbQuestions();
+    return () => { isMounted = false; };
+  }, [category]);
 
   const fallbackQ = {
     q: 'A car travels 120 km in 2 hours. What is its speed?',
@@ -320,6 +387,11 @@ export default function QuizScreen({ config = {}, onComplete }) {
         <div className="qs-cat-pill" style={{ color: meta.color, borderColor: `${meta.color}40`, background: `${meta.color}12` }}>
           <Icon size={13} />
           <span>{meta.label}</span>
+          {isDbQuestion && (
+            <span className="qs-db-tag" title="Dynamic question loaded from database">
+              <Database size={10} /> Live DB
+            </span>
+          )}
         </div>
 
         <div className="qs-right-header">

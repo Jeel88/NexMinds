@@ -1183,6 +1183,114 @@
   font-weight: 700;
 }
 
+/* Dynamic Week Bars Chart */
+.chart-live-badge {
+  font-size: 0.5625rem;
+  font-weight: 800;
+  color: #C6FF45;
+  background: rgba(198, 255, 69, 0.12);
+  border: 1px solid rgba(198, 255, 69, 0.3);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  letter-spacing: 0.06em;
+}
+
+.week-bars-wrapper {
+  width: 100%;
+  padding-top: 6px;
+}
+
+.week-bars-grid {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  height: 105px;
+  width: 100%;
+}
+
+.week-bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.week-bar-val {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: #8C8499;
+  min-height: 14px;
+  line-height: 1;
+}
+
+.week-bar-col--today .week-bar-val {
+  color: #C6FF45;
+  font-weight: 800;
+}
+
+.week-bar-track {
+  width: 100%;
+  max-width: 32px;
+  flex: 1;
+  background: #1F192C;
+  border: 1px solid #2B233C;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.week-bar-fill {
+  width: 100%;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #38BDF8 0%, #1E40AF 100%);
+  transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-height: 4px;
+}
+
+.fill-today {
+  background: linear-gradient(180deg, #C6FF45 0%, #84CC16 100%) !important;
+  box-shadow: 0 0 10px rgba(198, 255, 69, 0.4);
+}
+
+.week-bar-col--today .week-bar-track {
+  border-color: rgba(198, 255, 69, 0.45);
+  background: rgba(198, 255, 69, 0.05);
+}
+
+.week-bar-footer-labels {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.week-bar-day {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #8C8499;
+  text-transform: uppercase;
+}
+
+.week-bar-col--today .week-bar-day {
+  color: #C6FF45;
+  font-weight: 800;
+}
+
+.today-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #C6FF45;
+  box-shadow: 0 0 4px #C6FF45;
+}
+
 /* ------------------------------------------------------------
    3. Bottom Navigation Bar — REMOVED
    ------------------------------------------------------------ */
@@ -1608,23 +1716,43 @@
   margin-top: 10px;
 }
 
+.leaderboard-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
 .leaderboard-heading-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  min-width: 0;
+}
+
+.leaderboard-heading-row .matiks-section-eyebrow {
+  white-space: nowrap;
+  letter-spacing: 0.06em;
 }
 
 .leaderboard-rules-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   background: transparent;
   border: none;
   color: #C6FF45;
   font-size: 0.75rem;
   font-weight: 800;
   cursor: pointer;
-  padding: 0;
+  padding: 4px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
@@ -1634,14 +1762,20 @@
 }
 
 .leaderboard-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
   font-size: 0.6875rem;
   font-weight: 700;
   color: #C6FF45;
   background: rgba(198, 255, 69, 0.1);
   border: 1px solid rgba(198, 255, 69, 0.25);
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 9999px;
   letter-spacing: 0.02em;
+  line-height: 1.2;
 }
 
 .leaderboard-card-shell {
@@ -2259,6 +2393,37 @@
   border-top-color: #F1F5F9;
 }
 
+[data-theme="light"] .chart-live-badge {
+  color: #15803D;
+  background: #DCFCE7;
+  border-color: #86EFAC;
+}
+
+[data-theme="light"] .week-bar-track {
+  background: #F1F5F9;
+  border-color: #E2E8F0;
+}
+
+[data-theme="light"] .week-bar-val {
+  color: #64748B;
+}
+
+[data-theme="light"] .week-bar-col--today .week-bar-val {
+  color: #15803D;
+}
+
+[data-theme="light"] .week-bar-day {
+  color: #475569;
+}
+
+[data-theme="light"] .week-bar-col--today .week-bar-day {
+  color: #15803D;
+}
+
+[data-theme="light"] .fill-today {
+  background: linear-gradient(180deg, #65A30D 0%, #15803D 100%) !important;
+}
+
 [data-theme="light"] .redeem-xp-card {
   background: #FFFFFF;
   border-color: #E2E8F0;
@@ -2496,5 +2661,23 @@
   .podium-avatar {
     width: 36px;
     height: 36px;
+  }
+  .leaderboard-header-top {
+    gap: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .leaderboard-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .leaderboard-heading-row {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .leaderboard-rules-btn {
+    padding-left: 0;
   }
 }

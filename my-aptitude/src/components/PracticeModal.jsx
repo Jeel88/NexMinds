@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Play, Clock, Zap, Flame, FastForward, Puzzle, Crown, Hash } from 'lucide-react';
 import './PracticeModal.css';
 
@@ -24,8 +24,6 @@ export default function PracticeModal({
   const [timed, setTimed] = useState(true);
   const [launching, setLaunching] = useState(false);
 
-  if (!isOpen) return null;
-
   const meta = CAT_META[initialCategory] || CAT_META['math'];
   const Icon = meta.icon;
   const xpReward = isDailyChallenge ? 50 : 35;
@@ -38,6 +36,23 @@ export default function PracticeModal({
       onLaunchPractice?.({ category: initialCategory, count: 5, timed, isDailyChallenge });
     }, 400);
   };
+
+  useEffect(() => {
+    if (!isOpen || launching) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose?.();
+      } else if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        handleLaunch();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, launching, timed, initialCategory, isDailyChallenge]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="modal-backdrop" onClick={onClose} aria-hidden="true">

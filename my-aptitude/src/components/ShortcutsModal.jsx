@@ -1,16 +1,25 @@
+import { useEffect } from 'react';
 import { X, Keyboard } from 'lucide-react';
 import './BadgesModal.css';
 
 const SHORTCUTS = [
-  { key: 'Space', desc: 'Quick Start / Resume active practice session' },
+  { key: 'Space', desc: 'Quick Start practice session' },
   { key: '1 - 4', desc: 'Select option A, B, C, or D in questions' },
-  { key: 'Enter', desc: 'Submit answer and advance to next question' },
-  { key: 'P', desc: 'Open / Close Profile & Account Drawer' },
-  { key: 'Esc', desc: 'Close open dialogs, drawers, and practice setup' },
-  { key: 'M', desc: 'Toggle sound effects on / off' },
+  { key: 'Enter', desc: 'Submit answer and advance' },
+  { key: 'P', desc: 'Open / Close Profile Drawer' },
+  { key: 'Esc', desc: 'Close dialogs, drawers, or exit' },
 ];
 
 export default function ShortcutsModal({ isOpen, onClose }) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e) => {
+      if (e.key === 'Escape') onClose?.();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (

@@ -31,6 +31,7 @@ import RedeemStore from './RedeemStore';
 import StudyBook from './StudyBook';
 import Footer from './Footer';
 import RankInfoModal from './RankInfoModal';
+import PeerProfileModal from './PeerProfileModal';
 import './Dashboard.css';
 
 // 5 Aptitude categories definitions
@@ -114,6 +115,7 @@ export default function Dashboard() {
   const [quizConfig, setQuizConfig] = useState(null); // active quiz session
   const [activeView, setActiveView] = useState('dashboard'); // 'dashboard' | 'redeem' | 'study'
   const [activeRatingCatId, setActiveRatingCatId] = useState(null); // No rating card pre-selected on page load
+  const [selectedPeer, setSelectedPeer] = useState(null); // Selected contender profile for XP & stats modal
 
   const openRankInfo = (tab = 'rank') => {
     setRankInfoInitialTab(tab);
@@ -149,7 +151,7 @@ export default function Dashboard() {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, name, xp, streak, level, avatar')
+          .select('*')
           .order('xp', { ascending: false })
           .limit(50);
 
@@ -168,6 +170,97 @@ export default function Dashboard() {
       clearInterval(interval);
     };
   }, [user?.id, user?.xp]);
+
+  // Global Keyboard Navigation Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger when user is in input / textarea
+      const tag = e.target.tagName ? e.target.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) {
+        return;
+      }
+
+      // Ignore modifier keys
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        return;
+      }
+
+      // 1. ESCAPE: Close topmost open dialog / modal / drawer
+      if (e.key === 'Escape') {
+        if (selectedPeer) {
+          setSelectedPeer(null);
+          return;
+        }
+        if (shortcutsModalOpen) {
+          setShortcutsModalOpen(false);
+          return;
+        }
+        if (badgesModalOpen) {
+          setBadgesModalOpen(false);
+          return;
+        }
+        if (rankInfoModalOpen) {
+          setRankInfoModalOpen(false);
+          return;
+        }
+        if (practiceModalOpen) {
+          setPracticeModalOpen(false);
+          return;
+        }
+        if (profileDrawerOpen) {
+          setProfileDrawerOpen(false);
+          return;
+        }
+        if (activeView !== 'dashboard') {
+          setActiveView('dashboard');
+          return;
+        }
+        return;
+      }
+
+      // If any modal or drawer is open, let that modal handle its own keys
+      const isAnyModalOpen =
+        practiceModalOpen ||
+        badgesModalOpen ||
+        shortcutsModalOpen ||
+        rankInfoModalOpen ||
+        profileDrawerOpen ||
+        Boolean(selectedPeer);
+
+      if (isAnyModalOpen) {
+        return;
+      }
+
+      // 2. SPACE: Launch quick practice session
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        if (activeView !== 'dashboard') {
+          setActiveView('dashboard');
+        }
+        openPractice(selectedCatId || 'math', false);
+        return;
+      }
+
+      // 3. P: Toggle profile drawer
+      if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        setProfileDrawerOpen(prev => !prev);
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    practiceModalOpen,
+    badgesModalOpen,
+    shortcutsModalOpen,
+    rankInfoModalOpen,
+    profileDrawerOpen,
+    selectedPeer,
+    activeView,
+    selectedCatId,
+  ]);
 
   const openPractice = (catId = 'math', isDaily = false) => {
     setSelectedCatId(catId);
@@ -429,10 +522,10 @@ export default function Dashboard() {
               <div
                 key={peer.id}
                 className="story-circle-item friend-story"
-                onClick={() => openPractice('math', false)}
+                onClick={() => setSelectedPeer(peer)}
                 role="button"
                 tabIndex={0}
-                title={`${peer.name || 'Contender'} • ${peer.xp || 0} XP`}
+                title={`View ${peer.name || 'Contender'} • ${peer.xp || 0} XP`}
               >
                 <div className="friend-ring-circle">
                   {peer.avatar && peer.avatar.startsWith('http') ? (
@@ -588,7 +681,16 @@ export default function Dashboard() {
                 {rankingList.length >= 3 ? (
                   <div className="leaderboard-podium-row podium-grid-3">
                     {/* #2 Rank */}
-                    <div className={`podium-card podium-2 ${rankingList[1].isYou ? 'podium-card--you' : ''}`}>
+                    <div 
+                      className={`podium-card podium-2 ${rankingList[1].isYou ? 'podium-card--you' : ''}`}
+                      onClick={() => {
+                        if (rankingList[1].isYou) setProfileDrawerOpen(true);
+                        else setSelectedPeer(rankingList[1]);
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <span className="podium-medal">🥈</span>
                       <div className="podium-avatar">
                         {rankingList[1].avatar && rankingList[1].avatar.startsWith('http') ? (
@@ -603,7 +705,16 @@ export default function Dashboard() {
                     </div>
 
                     {/* #1 Rank (Center) */}
-                    <div className={`podium-card podium-1 ${rankingList[0].isYou ? 'podium-card--you' : ''}`}>
+                    <div 
+                      className={`podium-card podium-1 ${rankingList[0].isYou ? 'podium-card--you' : ''}`}
+                      onClick={() => {
+                        if (rankingList[0].isYou) setProfileDrawerOpen(true);
+                        else setSelectedPeer(rankingList[0]);
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <span className="podium-medal">👑</span>
                       <div className="podium-avatar podium-avatar--gold">
                         {rankingList[0].avatar && rankingList[0].avatar.startsWith('http') ? (
@@ -618,7 +729,16 @@ export default function Dashboard() {
                     </div>
 
                     {/* #3 Rank */}
-                    <div className={`podium-card podium-3 ${rankingList[2].isYou ? 'podium-card--you' : ''}`}>
+                    <div 
+                      className={`podium-card podium-3 ${rankingList[2].isYou ? 'podium-card--you' : ''}`}
+                      onClick={() => {
+                        if (rankingList[2].isYou) setProfileDrawerOpen(true);
+                        else setSelectedPeer(rankingList[2]);
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <span className="podium-medal">🥉</span>
                       <div className="podium-avatar">
                         {rankingList[2].avatar && rankingList[2].avatar.startsWith('http') ? (
@@ -709,6 +829,14 @@ export default function Dashboard() {
                           <div
                             key={player.id || idx}
                             className={`leaderboard-row ${isYou ? 'leaderboard-row--you' : ''}`}
+                            onClick={() => {
+                              if (isYou) setProfileDrawerOpen(true);
+                              else setSelectedPeer(player);
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            style={{ cursor: 'pointer' }}
+                            title={isYou ? 'View Your Profile' : `View ${player.name || 'Contender'} • ${player.xp || 0} XP`}
                           >
                             <div className="td-col td-rank">
                               {rankNum === 1 ? (
@@ -1191,6 +1319,26 @@ export default function Dashboard() {
         isOpen={rankInfoModalOpen}
         onClose={() => setRankInfoModalOpen(false)}
         initialTab={rankInfoInitialTab}
+      />
+
+      {/* ============================================================
+          9. CONTENDER / PEER PROFILE MODAL (XP & Stats Display)
+          ============================================================ */}
+      <PeerProfileModal
+        isOpen={Boolean(selectedPeer)}
+        peer={selectedPeer}
+        onClose={() => setSelectedPeer(null)}
+        rank={
+          selectedPeer
+            ? rankingList.findIndex((p) => p.id === selectedPeer.id) !== -1
+              ? rankingList.findIndex((p) => p.id === selectedPeer.id) + 1
+              : null
+            : null
+        }
+        onChallenge={(cat) => {
+          setSelectedPeer(null);
+          openPractice(cat || 'math', false);
+        }}
       />
     </div>
   );

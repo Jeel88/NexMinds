@@ -154,9 +154,15 @@ export function AuthProvider({ children }) {
       if (data && !error) {
         setUser({
           id: sbUser.id,
-          name: data.name || data.full_name || name,
+          name: data.name || data.full_name || sbUser.user_metadata?.full_name || sbUser.user_metadata?.name || name,
           email: sbUser.email,
           avatar: data.avatar || data.avatar_url || avatar,
+          college: data.college || sbUser.user_metadata?.college || '',
+          degree: data.degree || sbUser.user_metadata?.degree || '',
+          age: data.age || sbUser.user_metadata?.age || '',
+          target_exam: data.target_exam || sbUser.user_metadata?.target_exam || '',
+          city: data.city || sbUser.user_metadata?.city || '',
+          bio: data.bio || sbUser.user_metadata?.bio || '',
           xp: data.xp ?? 0,
           level: data.level ?? Math.max(1, Math.floor((data.xp || 0) / 250) + 1),
           streak: data.streak ?? 0,
@@ -409,6 +415,59 @@ export function AuthProvider({ children }) {
     setUser((prev) => (prev ? { ...prev, ...updates } : null));
   };
 
+  const saveProfileDetails = async (details) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...details };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    if (isSupabaseConfigured() && user?.id && !user?.isGuest) {
+      try {
+        const payload = {
+          name: details.name || user.name,
+          full_name: details.name || user.name,
+          updated_at: new Date().toISOString(),
+        };
+        if (details.college !== undefined) payload.college = details.college;
+        if (details.degree !== undefined) payload.degree = details.degree;
+        if (details.age !== undefined) payload.age = details.age ? Number(details.age) : null;
+        if (details.target_exam !== undefined) payload.target_exam = details.target_exam;
+        if (details.city !== undefined) payload.city = details.city;
+        if (details.bio !== undefined) payload.bio = details.bio;
+
+        const { error: profileErr } = await supabase
+          .from('profiles')
+          .update(payload)
+          .eq('id', user.id);
+
+        if (profileErr) {
+          console.warn('[Supabase Profiles Update Notice]:', profileErr.message);
+        }
+
+        // Also save to Supabase Auth user_metadata
+        await supabase.auth.updateUser({
+          data: {
+            name: payload.name,
+            full_name: payload.full_name,
+            college: details.college,
+            degree: details.degree,
+            age: details.age,
+            target_exam: details.target_exam,
+            city: details.city,
+            bio: details.bio,
+          },
+        });
+      } catch (err) {
+        console.warn('Profile details save error:', err);
+      }
+    }
+  };
+
   const addXP = async (amount) => {
     if (!amount || amount <= 0) return;
     setUser((prev) => {
@@ -647,6 +706,7 @@ export function AuthProvider({ children }) {
         loginWithGoogle,
         continueAsGuest,
         updateUser,
+        saveProfileDetails,
         addXP,
         deductXP,
         recordQuizResult,

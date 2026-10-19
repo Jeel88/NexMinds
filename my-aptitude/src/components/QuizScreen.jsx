@@ -239,6 +239,56 @@ export default function QuizScreen({ config = {}, onComplete }) {
     }
   };
 
+  /* Keyboard navigation inside Quiz */
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if user is in an input or modifier keys are pressed
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const tag = e.target.tagName ? e.target.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea') return;
+
+      // Escape: quit quiz
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onComplete?.();
+        return;
+      }
+
+      // If in results phase: Enter, Space, or Escape returns to dashboard
+      if (phase === 'results') {
+        if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
+          e.preventDefault();
+          onComplete?.();
+        }
+        return;
+      }
+
+      // If in active quiz phase:
+      if (!isAnswered) {
+        // Select options via 1-4 or A-D
+        let optIdx = -1;
+        if (e.key === '1' || e.key === 'a' || e.key === 'A') optIdx = 0;
+        else if (e.key === '2' || e.key === 'b' || e.key === 'B') optIdx = 1;
+        else if (e.key === '3' || e.key === 'c' || e.key === 'C') optIdx = 2;
+        else if (e.key === '4' || e.key === 'd' || e.key === 'D') optIdx = 3;
+
+        if (optIdx >= 0 && optIdx < (currentQ.options?.length || 0)) {
+          e.preventDefault();
+          handleAnswer(optIdx);
+        }
+      } else {
+        // If question already answered, Enter or Space advances to next question / results
+        if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
+          e.preventDefault();
+          handleNext();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, isAnswered, currentQ, onComplete, handleNext, handleAnswer]);
+
   const timerPct   = (timer / TIMED_SECS) * 100;
   const timerColor = timer > 15 ? meta.color : timer > 7 ? '#F59E0B' : '#EF4444';
 

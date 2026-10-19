@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react';
-import { 
-  X, 
-  LogOut, 
-  Zap, 
-  Flame, 
-  Award, 
-  Target, 
-  Volume2, 
-  VolumeX, 
-  Sparkles, 
-  RefreshCw, 
-  Keyboard, 
-  ChevronRight, 
-  ShieldCheck, 
+import {
+  X,
+  LogOut,
+  Zap,
+  Flame,
+  Award,
+  Target,
+  RefreshCw,
+  Keyboard,
+  ChevronRight,
+  ShieldCheck,
   UserCheck,
   BookOpen,
-  Gift
+  Gift,
+  GraduationCap,
+  BookMarked,
+  Pencil,
+  Lock,
+  Check,
+  MapPin,
+  User
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './ProfileDrawer.css';
@@ -28,11 +32,60 @@ export default function ProfileDrawer({
   onOpenStudyBook,
   onOpenRedeemStore,
 }) {
-  const { user, logout, updateUser, resetStats } = useAuth();
-  const [soundOn, setSoundOn] = useState(user?.soundEnabled ?? true);
-  const [motionOn, setMotionOn] = useState(user?.motionEnabled ?? true);
+  const { user, logout, updateUser, saveProfileDetails, resetStats } = useAuth();
   const [goal, setGoal] = useState(user?.dailyGoal ?? 100);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  // Profile Edit State
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    college: user?.college || '',
+    degree: user?.degree || '',
+    age: user?.age || '',
+    target_exam: user?.target_exam || '',
+    city: user?.city || '',
+    bio: user?.bio || '',
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        college: user.college || '',
+        degree: user.degree || '',
+        age: user.age || '',
+        target_exam: user.target_exam || '',
+        city: user.city || '',
+        bio: user.bio || '',
+      });
+    }
+  }, [user, isEditing]);
+
+  const handleSaveProfile = async (e) => {
+    e?.preventDefault();
+    setIsSaving(true);
+    try {
+      await saveProfileDetails?.({
+        name: formData.name.trim() || user?.name || 'Thinker',
+        college: formData.college.trim(),
+        degree: formData.degree.trim(),
+        age: formData.age ? Number(formData.age) : '',
+        target_exam: formData.target_exam.trim(),
+        city: formData.city.trim(),
+        bio: formData.bio.trim(),
+      });
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        setIsEditing(false);
+      }, 900);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Close on ESC key
   useEffect(() => {
@@ -58,18 +111,6 @@ export default function ProfileDrawer({
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const handleToggleSound = () => {
-    const next = !soundOn;
-    setSoundOn(next);
-    updateUser({ soundEnabled: next });
-  };
-
-  const handleToggleMotion = () => {
-    const next = !motionOn;
-    setMotionOn(next);
-    updateUser({ motionEnabled: next });
-  };
 
   const handleGoalChange = (newGoal) => {
     setGoal(newGoal);
@@ -102,18 +143,18 @@ export default function ProfileDrawer({
   return (
     <div className="profile-drawer-portal">
       {/* Backdrop */}
-      <div 
-        className="profile-drawer-backdrop" 
+      <div
+        className="profile-drawer-backdrop"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Drawer Container */}
-      <aside 
-        className="profile-drawer" 
+      <aside
+        className="profile-drawer"
         id="profile-drawer"
-        role="dialog" 
-        aria-modal="true" 
+        role="dialog"
+        aria-modal="true"
         aria-labelledby="profile-drawer-title"
       >
         {/* Header */}
@@ -122,8 +163,8 @@ export default function ProfileDrawer({
             <span className="drawer-eyebrow">User Profile & Settings</span>
             <h2 id="profile-drawer-title" className="drawer-title">Account Center</h2>
           </div>
-          <button 
-            className="drawer-close-btn" 
+          <button
+            className="drawer-close-btn"
             onClick={onClose}
             aria-label="Close drawer"
             id="close-profile-drawer"
@@ -159,15 +200,15 @@ export default function ProfileDrawer({
             <div className="drawer-bio-details">
               <div className="drawer-bio-name-row">
                 <h3 className="drawer-bio-name">{user?.name || 'Aptitude Explorer'}</h3>
-                {user?.isGuest ? (
-                  <span className="badge badge-dark">Guest</span>
-                ) : (
-                  <span className="badge badge-lime">Pro</span>
-                )}
               </div>
-              <p className="drawer-bio-email">
-                {user?.email || 'demo.session@nexminds.edu'}
-              </p>
+              <div className="drawer-bio-email-row">
+                <p className="drawer-bio-email">
+                  {user?.email || 'demo.session@nexminds.edu'}
+                </p>
+                <span className="locked-field-badge" title="Managed by Auth Provider (Read Only)">
+                  <Lock size={10} />
+                </span>
+              </div>
               <div className="drawer-bio-tags">
                 <span className="tier-tag">
                   <UserCheck size={12} /> Level {level} Thinker
@@ -177,7 +218,223 @@ export default function ProfileDrawer({
                 </span>
               </div>
             </div>
+
+            <button
+              type="button"
+              className={`drawer-edit-toggle-btn ${isEditing ? 'drawer-edit-toggle-btn--active' : ''}`}
+              onClick={() => setIsEditing(!isEditing)}
+              title={isEditing ? 'Cancel Editing' : 'Edit Profile Information'}
+            >
+              <Pencil size={13} />
+              <span>{isEditing ? 'Close' : 'Edit'}</span>
+            </button>
           </div>
+
+          {/* EDIT PROFILE FORM */}
+          {isEditing ? (
+            <form className="drawer-edit-profile-form" onSubmit={handleSaveProfile}>
+              <div className="drawer-edit-header">
+                <div className="drawer-edit-title-group">
+                  <Pencil size={15} className="text-lime" />
+                  <span className="drawer-edit-title">EDIT PROFILE DETAILS</span>
+                </div>
+              </div>
+
+              <div className="drawer-edit-notice">
+                <Lock size={13} className="text-muted" />
+                <span>Profile photo and email are managed by your Google account and cannot be edited.</span>
+              </div>
+
+              <div className="drawer-edit-field">
+                <label className="drawer-edit-label">Full Name</label>
+                <input
+                  type="text"
+                  className="drawer-edit-input"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Your Full Name"
+                  required
+                />
+              </div>
+
+              <div className="drawer-edit-field">
+                <label className="drawer-edit-label">College / University</label>
+                <div className="drawer-input-with-icon">
+                  <GraduationCap size={16} className="drawer-field-icon" />
+                  <input
+                    type="text"
+                    className="drawer-edit-input drawer-edit-input--icon"
+                    value={formData.college}
+                    onChange={(e) => setFormData({ ...formData, college: e.target.value })}
+                    placeholder="e.g. IIT Bombay / Stanford University"
+                  />
+                </div>
+              </div>
+
+              <div className="drawer-edit-field">
+                <label className="drawer-edit-label">Degree & Branch</label>
+                <div className="drawer-input-with-icon">
+                  <BookMarked size={16} className="drawer-field-icon" />
+                  <input
+                    type="text"
+                    className="drawer-edit-input drawer-edit-input--icon"
+                    value={formData.degree}
+                    onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
+                    placeholder="e.g. B.Tech Computer Science / Economics"
+                  />
+                </div>
+              </div>
+
+              <div className="drawer-edit-row-2">
+                <div className="drawer-edit-field">
+                  <label className="drawer-edit-label">Age</label>
+                  <div className="drawer-input-with-icon">
+                    <User size={16} className="drawer-field-icon" />
+                    <input
+                      type="number"
+                      min="12"
+                      max="99"
+                      className="drawer-edit-input drawer-edit-input--icon"
+                      value={formData.age}
+                      onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                      placeholder="e.g. 21"
+                    />
+                  </div>
+                </div>
+
+                <div className="drawer-edit-field">
+                  <label className="drawer-edit-label">City / Location</label>
+                  <div className="drawer-input-with-icon">
+                    <MapPin size={16} className="drawer-field-icon" />
+                    <input
+                      type="text"
+                      className="drawer-edit-input drawer-edit-input--icon"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="e.g. Mumbai, India"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="drawer-edit-field">
+                <label className="drawer-edit-label">Target Exam / Career Goal</label>
+                <div className="drawer-input-with-icon">
+                  <Target size={16} className="drawer-field-icon" />
+                  <input
+                    type="text"
+                    className="drawer-edit-input drawer-edit-input--icon"
+                    value={formData.target_exam}
+                    onChange={(e) => setFormData({ ...formData, target_exam: e.target.value })}
+                    placeholder="e.g. Tech Placements & FAANG / CAT 2026 / GMAT"
+                  />
+                </div>
+              </div>
+
+              <div className="drawer-edit-field">
+                <label className="drawer-edit-label">Bio / Motto</label>
+                <textarea
+                  className="drawer-edit-textarea"
+                  rows="2"
+                  value={formData.bio}
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  placeholder="e.g. Mathematical thinker aiming for 99th percentile velocity..."
+                />
+              </div>
+
+              <div className="drawer-edit-actions">
+                <button
+                  type="button"
+                  className="drawer-edit-cancel-btn"
+                  onClick={() => setIsEditing(false)}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="drawer-edit-save-btn"
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <RefreshCw size={14} className="drawer-spin-icon" />
+                      <span>Saving...</span>
+                    </>
+                  ) : saveSuccess ? (
+                    <>
+                      <Check size={16} />
+                      <span>Changes Saved!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} />
+                      <span>Save Changes</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          ) : (
+            /* ACADEMIC & DEMOGRAPHIC OVERVIEW CARD */
+            <div className="drawer-academic-card">
+              <div className="drawer-academic-header">
+                <div className="drawer-academic-title-wrap">
+                  <GraduationCap size={16} className="text-cyan" />
+                  <span className="drawer-stat-lbl">ACADEMIC & ASPIRATIONS</span>
+                </div>
+                <button
+                  type="button"
+                  className="drawer-inline-edit-btn"
+                  onClick={() => setIsEditing(true)}
+                  title="Edit details"
+                >
+                  <Pencil size={12} />
+                  <span>Edit</span>
+                </button>
+              </div>
+
+              <div className="drawer-academic-list">
+                <div className="drawer-academic-item">
+                  <span className="academic-item-lbl">COLLEGE / UNIVERSITY</span>
+                  <span className="academic-item-val">
+                    {user?.college || <span className="text-muted-italics">Tap edit to set college</span>}
+                  </span>
+                </div>
+
+                <div className="drawer-academic-item">
+                  <span className="academic-item-lbl">STREAM / DEGREE</span>
+                  <span className="academic-item-val">
+                    {user?.degree || <span className="text-muted-italics">Tap edit to set degree</span>}
+                  </span>
+                </div>
+
+                <div className="drawer-academic-item">
+                  <span className="academic-item-lbl">TARGET EXAM / GOAL</span>
+                  <span className="academic-item-val text-lime">
+                    {user?.target_exam || 'General Aptitude Mastery'}
+                  </span>
+                </div>
+
+                <div className="drawer-academic-pills-row">
+                  <div className="drawer-info-pill">
+                    <User size={12} className="text-cyan" />
+                    <span>{user?.age ? `${user.age} Years Old` : 'Age not set'}</span>
+                  </div>
+                  <div className="drawer-info-pill">
+                    <MapPin size={12} className="text-orange" />
+                    <span>{user?.city || 'Location not set'}</span>
+                  </div>
+                </div>
+
+                {user?.bio && (
+                  <div className="drawer-bio-quote">
+                    <p>"{user.bio}"</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Progress / Stats Snapshot */}
           <div className="drawer-stats-card">
@@ -209,8 +466,8 @@ export default function ProfileDrawer({
                 <span className="text-accent">{levelProgress}% ({xp}/{nextLevelXP} XP)</span>
               </div>
               <div className="progress-bar progress-bar--slim">
-                <div 
-                  className="progress-fill" 
+                <div
+                  className="progress-fill"
                   style={{ width: `${levelProgress}%` }}
                 />
               </div>
@@ -225,8 +482,8 @@ export default function ProfileDrawer({
                 <span className="goal-value">{todayXP} / {goal} XP</span>
               </div>
               <div className="progress-bar progress-bar--sm">
-                <div 
-                  className="progress-fill fill-lime" 
+                <div
+                  className="progress-fill fill-lime"
                   style={{ width: `${goalProgress}%` }}
                 />
               </div>
@@ -280,7 +537,7 @@ export default function ProfileDrawer({
             <span className="drawer-section-title">Cognitive Performance & Learning</span>
 
             {/* Study Handbook (Pure Learning, Zero XP) */}
-            <button 
+            <button
               className="drawer-menu-item"
               onClick={() => {
                 onClose();
@@ -299,8 +556,8 @@ export default function ProfileDrawer({
               </div>
               <ChevronRight size={18} className="menu-chevron" />
             </button>
-            
-            <button 
+
+            <button
               className="drawer-menu-item"
               onClick={() => {
                 onClose();
@@ -321,7 +578,7 @@ export default function ProfileDrawer({
             </button>
 
             {/* XP Rewards Vault */}
-            <button 
+            <button
               className="drawer-menu-item"
               onClick={() => {
                 onClose();
@@ -341,7 +598,7 @@ export default function ProfileDrawer({
               <ChevronRight size={18} className="menu-chevron" />
             </button>
 
-            <button 
+            <button
               className="drawer-menu-item"
               onClick={() => {
                 onClose();
@@ -362,57 +619,14 @@ export default function ProfileDrawer({
             </button>
           </div>
 
-          {/* App Preferences */}
-          <div className="drawer-section">
-            <span className="drawer-section-title">Training Preferences</span>
 
-            <div className="drawer-toggle-item">
-              <div className="drawer-menu-left">
-                <div className="menu-icon-box">
-                  {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
-                </div>
-                <div className="menu-text">
-                  <span className="menu-title">Sound Effects</span>
-                  <span className="menu-subtitle">Audio feedback on answers</span>
-                </div>
-              </div>
-              <button 
-                type="button"
-                className={`switch-toggle ${soundOn ? 'switch-toggle--on' : ''}`}
-                onClick={handleToggleSound}
-                aria-label="Toggle sound"
-              >
-                <span className="switch-thumb" />
-              </button>
-            </div>
-
-            <div className="drawer-toggle-item">
-              <div className="drawer-menu-left">
-                <div className="menu-icon-box">
-                  <Sparkles size={18} />
-                </div>
-                <div className="menu-text">
-                  <span className="menu-title">Micro-Animations</span>
-                  <span className="menu-subtitle">Glow and spring effects</span>
-                </div>
-              </div>
-              <button 
-                type="button"
-                className={`switch-toggle ${motionOn ? 'switch-toggle--on' : ''}`}
-                onClick={handleToggleMotion}
-                aria-label="Toggle motion"
-              >
-                <span className="switch-thumb" />
-              </button>
-            </div>
-          </div>
 
           {/* Danger / Reset Section */}
           <div className="drawer-section">
             <span className="drawer-section-title">Maintenance</span>
 
             {!showResetConfirm ? (
-              <button 
+              <button
                 type="button"
                 className="drawer-menu-item text-subtle"
                 onClick={() => setShowResetConfirm(true)}
@@ -431,15 +645,15 @@ export default function ProfileDrawer({
               <div className="reset-confirm-box">
                 <p className="reset-confirm-msg">Reset all demo stats to 0?</p>
                 <div className="reset-confirm-actions">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="btn btn-sm btn-danger"
                     onClick={handleConfirmReset}
                   >
                     Confirm Reset
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="btn btn-sm btn-ghost"
                     onClick={() => setShowResetConfirm(false)}
                   >

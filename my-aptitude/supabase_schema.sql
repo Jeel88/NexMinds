@@ -25,6 +25,12 @@ alter table public.profiles add column if not exists created_at timestamp with t
 alter table public.profiles add column if not exists updated_at timestamp with time zone default now();
 alter table public.profiles add column if not exists ratings jsonb default '{"math": 1200, "puzzle": 1200, "logic": 1200, "memory": 1200}'::jsonb;
 alter table public.profiles add column if not exists rating_trends jsonb default '{"math": "+0 —", "puzzle": "+0 —", "logic": "+0 —", "memory": "+0 —"}'::jsonb;
+alter table public.profiles add column if not exists college text;
+alter table public.profiles add column if not exists degree text;
+alter table public.profiles add column if not exists age integer;
+alter table public.profiles add column if not exists target_exam text;
+alter table public.profiles add column if not exists city text;
+alter table public.profiles add column if not exists bio text;
 
 -- 3. Enable Row Level Security (RLS)
 alter table public.profiles enable row level security;

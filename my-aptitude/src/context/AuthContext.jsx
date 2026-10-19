@@ -649,6 +649,33 @@ export function AuthProvider({ children }) {
         } catch {}
       }
 
+      // 1b. Track quiz stats for real-time achievement badges
+      try {
+        const statsKey = `myaptitude_stats_${prev.id || 'guest'}`;
+        const raw = localStorage.getItem(statsKey);
+        const stats = raw ? JSON.parse(raw) : {
+          sessionsCount: 0,
+          perfectSessions: 0,
+          mathScore100: false,
+          logicScore100: false,
+          puzzleScore100: false,
+          memoryScore100: false,
+          totalCorrect: 0,
+          totalQuestions: 0,
+        };
+        stats.sessionsCount = Math.max((stats.sessionsCount || 0) + 1, (prev.sessionsCount || 0) + 1);
+        stats.totalCorrect = (stats.totalCorrect || 0) + (score || 0);
+        stats.totalQuestions = (stats.totalQuestions || 0) + (total || 5);
+        if (score === total && total >= 3) {
+          stats.perfectSessions = (stats.perfectSessions || 0) + 1;
+          if (validKey === 'math') stats.mathScore100 = true;
+          if (validKey === 'logic') stats.logicScore100 = true;
+          if (validKey === 'puzzle') stats.puzzleScore100 = true;
+          if (validKey === 'memory') stats.memoryScore100 = true;
+        }
+        localStorage.setItem(statsKey, JSON.stringify(stats));
+      } catch {}
+
       // 2. Persist to Supabase Database (profiles table) & Supabase Auth DB (user_metadata)
       if (isSupabaseConfigured() && prev.id && !prev.isGuest) {
         // A. Update Supabase profiles table
